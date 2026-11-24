@@ -1,0 +1,69 @@
+config {
+  type: "table",
+  name: "DIM_PRIME_PARTNER_SCORECARD",
+  description: "Migrated from Snowflake TSK_02B_MART_PRIME_PARTNERS. Evaluates active merchants against all 4 Prime Partner criteria over trailing 90 days.",
+  bigquery: {
+    clusterBy: ["REG_CD", "IS_PRIME_PARTNER"]
+  },
+  assertions: {
+    uniqueKey: ["MRC_ID"],
+    nonNull: ["MRC_ID", "IS_PRIME_PARTNER"]
+  },
+  tags: ["tier2_marts", "powerbi_gold", "migrated_from_snowflake_tasks"]
+}
+
+WITH anchor AS (
+  SELECT MAX(ORD_DT) AS MAX_DT
+  FROM ${ref("STG_ORDER_BASKETS")}
+),
+win90 AS (
+  SELECT b.*
+  FROM ${ref("STG_ORDER_BASKETS")} b
+  CROSS JOIN anchor a
+  WHERE b.ORD_DT > DATE_SUB(a.MAX_DT, INTERVAL 90 DAY)
+),
+agg AS (
+  SELECT
+    w.MRC_ID,
+    COUNT(*) AS TOTAL_ORD_90D,
+    COUNTIF(w.ORD_STS_CD = 'D') AS DELIV_ORD_90D,
+    COUNTIF(w.ORD_STS_CD = 'R') AS REJ_ORD_90D,
+    SUM(IF(w.ORD_STS_CD = 'D', w.GMV_USD, NUMERIC '0')) AS GMV_90D_USD,
+    AVG(IF(w.ORD_STS_CD = 'D', p.KITCHEN_PREP_SEC / 60.0, NULL)) AS AVG_PREP_MIN_90D,
+    COUNTIF(w.ORD_STS_CD = 'D' AND COALESCE(d.QUALITY_DISPUTE_CNT, 0) > 0) AS QUAL_DISP_ORD_90D,
+    SUM(IF(w.ORD_STS_CD = 'D', COALESCE(d.CHARGEBACK_RECOVERED_USD, NUMERIC '0'), NUMERIC '0')) AS CBK_90D_USD
+  FROM win90 w
+  LEFT JOIN ${ref("STG_CLEAN_DELIVERY_PINGS")} p
+    ON w.ORD_ID = p.ORD_ID
+  LEFT JOIN ${ref("STG_ORDER_DISPUTES_AGG")} d
+    ON w.ORD_ID = d.ORD_ID
+  GROUP BY w.MRC_ID
+)
+SELECT
+  m.MRC_ID,
+  m.MRC_NM,
+  IF(m.VERT_CD = 1, 'Restaurant', 'Grocery') AS VERTICAL_NM,
+  m.CUISINE_CAT,
+  z.ZONE_ID,
+  z.CITY_NM,
+  z.REG_CD,
+  COALESCE(a.GMV_90D_USD, NUMERIC '0') AS TRAILING_90D_GMV_USD,
+  COALESCE(a.DELIV_ORD_90D, 0) AS DELIVERED_ORDERS_90D,
+  ROUND(a.AVG_PREP_MIN_90D, 2) AS AVG_PREP_MIN_90D,
+  ROUND(SAFE_DIVIDE(COALESCE(a.QUAL_DISP_ORD_90D, 0), a.DELIV_ORD_90D), 4) AS QUALITY_DISPUTE_RATE,
+  ROUND(SAFE_DIVIDE(COALESCE(a.REJ_ORD_90D, 0), a.TOTAL_ORD_90D), 4) AS MERCHANT_REJECTION_RATE,
+  COALESCE(a.CBK_90D_USD, NUMERIC '0') AS CHARGEBACK_DEDUCTIONS_USD,
+  IF(
+    COALESCE(a.GMV_90D_USD, NUMERIC '0') > 25000
+    AND a.AVG_PREP_MIN_90D < 14.0
+    AND SAFE_DIVIDE(COALESCE(a.QUAL_DISP_ORD_90D, 0), a.DELIV_ORD_90D) < 0.02
+    AND SAFE_DIVIDE(COALESCE(a.REJ_ORD_90D, 0), a.TOTAL_ORD_90D) < 0.01,
+    TRUE,
+    FALSE
+  ) AS IS_PRIME_PARTNER
+FROM ${ref("quickbite_raw_ops", "MRC_PARTNER_MSTR")} m
+JOIN ${ref("quickbite_raw_ops", "GEO_ZONE_LKP")} z
+  ON m.ZONE_ID = z.ZONE_ID
+LEFT JOIN agg a
+  ON m.MRC_ID = a.MRC_ID
+WHERE m.ACTIVE_FLG = 1

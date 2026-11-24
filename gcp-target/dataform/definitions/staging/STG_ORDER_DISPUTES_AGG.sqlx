@@ -1,0 +1,24 @@
+config {
+  type: "table",
+  name: "STG_ORDER_DISPUTES_AGG",
+  description: "Migrated from Snowflake TSK_01C_STAGE_DISPUTES. Pre-aggregates approved refunds (RFND_STS_FLG = 1) at ORD_ID grain and joins chargebacks via 'CBK-' || ORD_ID.",
+  bigquery: {
+    clusterBy: ["ORD_ID"]
+  },
+  assertions: {
+    uniqueKey: ["ORD_ID"],
+    nonNull: ["ORD_ID", "APPROVED_REFUND_USD"]
+  },
+  tags: ["tier1_staging", "migrated_from_snowflake_tasks"]
+}
+
+SELECT
+  d.ORD_ID,
+  SUM(IF(d.RFND_STS_FLG = 1, CAST(d.RFND_AMT_USD AS NUMERIC), NUMERIC '0')) AS APPROVED_REFUND_USD,
+  COUNTIF(d.RFND_STS_FLG = 1 AND d.DSP_RSN_CD IN (1, 2)) AS QUALITY_DISPUTE_CNT,
+  COUNT(DISTINCT d.DSP_ID) AS TOTAL_DISPUTE_CNT,
+  COALESCE(MAX(ABS(CAST(led.LEDGER_AMT_USD AS NUMERIC))), NUMERIC '0') AS CHARGEBACK_RECOVERED_USD
+FROM ${ref("quickbite_raw_ops", "DSP_REFUND_FCT")} d
+LEFT JOIN ${ref("quickbite_raw_ops", "MRC_PAYOUT_LEDGER")} led
+  ON CONCAT('CBK-', d.ORD_ID) = led.REF_DOC_TXT
+GROUP BY d.ORD_ID

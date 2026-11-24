@@ -1,0 +1,28 @@
+# ==============================================================================
+# QuickBite Upstream Operational Source (PostgreSQL OLTP for Airbyte Sync)
+# Usage:
+#   docker compose -f ingestion-airbyte/docker-compose.oltp.yml up -d
+#   # Combined with Airbyte OSS (`abctl local install --low-resource-mode`)
+#   # or Airbyte Cloud pointing at your tunnel/host.
+# ==============================================================================
+services:
+  quickbite-oltp-postgres:
+    image: postgres:16-alpine
+    container_name: quickbite-oltp-postgres
+    restart: unless-stopped
+    command:
+      - "postgres"
+      - "-c"
+      - "wal_level=logical"
+      - "-c"
+      - "max_wal_senders=10"
+      - "-c"
+      - "max_replication_slots=10"
+    environment:
+      POSTGRES_USER: qb_airbyte_user
+      POSTGRES_PASSWORD: qb_demo_password
+      POSTGRES_DB: quickbite_oltp
+    ports:
+      - "5439:5432"
+    volumes:
+      - ./init_oltp.sql:/docker-entrypoint-initdb.d/01_init_oltp.sql:ro

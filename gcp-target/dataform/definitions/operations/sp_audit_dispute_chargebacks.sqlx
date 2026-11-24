@@ -1,0 +1,26 @@
+config {
+  type: "operations",
+  name: "sp_audit_dispute_chargebacks",
+  dependencies: ["RPT_PBI_EXECUTIVE_SUMMARY"],
+  description: "Migrated from Snowflake Scripting Stored Procedure SP_AUDIT_DISPUTE_CHARGEBACKS called by TSK_03_REFRESH_PBI_AND_AUDIT.",
+  tags: ["tier3_operations", "migrated_from_snowflake_tasks"]
+}
+
+CREATE OR REPLACE PROCEDURE `${dataform.projectConfig.defaultDatabase}.${dataform.projectConfig.defaultSchema}.SP_AUDIT_DISPUTE_CHARGEBACKS`(
+  P_HOLD_THRESHOLD_USD FLOAT64
+)
+BEGIN
+  UPDATE `${dataform.projectConfig.defaultDatabase}.quickbite_raw_ops.MRC_PAYOUT_LEDGER` tgt
+  SET PYT_STS_FLG = 9
+  WHERE tgt.PYT_STS_FLG = 0
+    AND tgt.REF_DOC_TXT LIKE 'STL-%'
+    AND tgt.MRC_ID IN (
+      SELECT MRC_ID
+      FROM `${dataform.projectConfig.defaultDatabase}.quickbite_raw_ops.MRC_PAYOUT_LEDGER`
+      WHERE REF_DOC_TXT LIKE 'CBK-%'
+      GROUP BY MRC_ID
+      HAVING SUM(ABS(CAST(LEDGER_AMT_USD AS FLOAT64))) >= P_HOLD_THRESHOLD_USD
+    );
+END;
+
+CALL `${dataform.projectConfig.defaultDatabase}.${dataform.projectConfig.defaultSchema}.SP_AUDIT_DISPUTE_CHARGEBACKS`(500.0);

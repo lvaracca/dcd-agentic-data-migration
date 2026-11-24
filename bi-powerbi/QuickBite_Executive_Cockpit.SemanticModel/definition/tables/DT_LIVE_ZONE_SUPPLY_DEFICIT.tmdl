@@ -1,0 +1,74 @@
+table DT_LIVE_ZONE_SUPPLY_DEFICIT
+
+	measure 'Live Online Couriers' = SUM(DT_LIVE_ZONE_SUPPLY_DEFICIT[ONLINE_CRR_N])
+		formatString: #,0
+		displayFolder: Live Fleet Dispatch
+
+	measure 'Live Supply Deficit Ratio' =
+			DIVIDE(
+				SUM(DT_LIVE_ZONE_SUPPLY_DEFICIT[UNASSIGNED_ORD_N]),
+				SUM(DT_LIVE_ZONE_SUPPLY_DEFICIT[IDLE_CRR_N]),
+				0
+			)
+		formatString: 0.00
+		displayFolder: Live Fleet Dispatch
+
+	/// Zones where Unassigned Orders exceed 2.5x Idle Couriers (Surge Dispatch Alert)
+	measure 'Critical Deficit Zones' =
+			CALCULATE(
+				COUNTROWS(DT_LIVE_ZONE_SUPPLY_DEFICIT),
+				DT_LIVE_ZONE_SUPPLY_DEFICIT[SUPPLY_DEFICIT_RATIO] >= 2.50
+			)
+		formatString: #,0
+		displayFolder: Live Fleet Dispatch
+
+	column LATEST_SNAP_TS
+		dataType: dateTime
+		sourceColumn: LATEST_SNAP_TS
+
+	column ZONE_ID
+		dataType: string
+		sourceColumn: ZONE_ID
+
+	column CITY_NM
+		dataType: string
+		sourceColumn: CITY_NM
+
+	column CNTRY_CD
+		dataType: string
+		sourceColumn: CNTRY_CD
+
+	column REG_CD
+		dataType: string
+		sourceColumn: REG_CD
+
+	column ONLINE_CRR_N
+		dataType: int64
+		sourceColumn: ONLINE_CRR_N
+
+	column BUSY_CRR_N
+		dataType: int64
+		sourceColumn: BUSY_CRR_N
+
+	column IDLE_CRR_N
+		dataType: int64
+		sourceColumn: IDLE_CRR_N
+
+	column UNASSIGNED_ORD_N
+		dataType: int64
+		sourceColumn: UNASSIGNED_ORD_N
+
+	column SUPPLY_DEFICIT_RATIO
+		dataType: double
+		sourceColumn: SUPPLY_DEFICIT_RATIO
+
+	partition DT_LIVE_ZONE_SUPPLY_DEFICIT-Partition = m
+		mode: directQuery
+		source =
+				let
+				    Source = GoogleBigQuery.Database([BillingProject=GcpProjectId, UseStorageApi=true]),
+				    Project = Source{[Name=GcpProjectId]}[Data],
+				    MartDataset = Project{[Name=BigQueryDataset,Kind="Schema"]}[Data],
+				    Tbl = MartDataset{[Name="DT_LIVE_ZONE_SUPPLY_DEFICIT",Kind="Table"]}[Data]
+				in
+				    Tbl

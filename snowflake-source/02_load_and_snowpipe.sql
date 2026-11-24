@@ -1,0 +1,71 @@
+-- =============================================================================
+-- QuickBite Snowflake Source Setup — Step 2: File Formats, Stages, COPY & Pipe
+-- =============================================================================
+USE ROLE ACCOUNTADMIN;
+USE WAREHOUSE QB_LOAD_WH;
+USE DATABASE QUICKBITE_PROD;
+
+CREATE OR REPLACE FILE FORMAT OPS_RAW.CSV_STD_FMT
+    TYPE = CSV
+    COMPRESSION = GZIP
+    SKIP_HEADER = 1
+    FIELD_OPTIONALLY_ENCLOSED_BY = '"'
+    NULL_IF = ('', 'NULL');
+
+CREATE OR REPLACE FILE FORMAT IOT_RAW.JSONL_GZIP_FMT
+    TYPE = JSON
+    COMPRESSION = GZIP;
+
+-- Internal stage used by seed_snowflake_instance.py PUT commands
+CREATE OR REPLACE STAGE OPS_RAW.SEED_LOAD_STAGE
+    FILE_FORMAT = OPS_RAW.CSV_STD_FMT;
+
+CREATE OR REPLACE STAGE IOT_RAW.IOT_LANDING_STAGE
+    FILE_FORMAT = IOT_RAW.JSONL_GZIP_FMT;
+
+-- External GCS stage for exporting/unloading proprietary FDN tables to Parquet
+CREATE OR REPLACE STAGE OPS_RAW.GCS_EXPORT_STAGE
+    STORAGE_INTEGRATION = QUICKBITE_GCS_INT
+    URL = 'gcs://{{GCS_LAKEHOUSE_BUCKET}}/fdn-export/'
+    FILE_FORMAT = (TYPE = PARQUET);
+
+-- Bulk COPY INTO for all 11 CSV tables (4 Iceberg on GCS + 7 Native FDN)
+COPY INTO OPS_RAW.SYS_CAL_DIM FROM @OPS_RAW.SEED_LOAD_STAGE/sys_cal_dim.csv.gz;
+COPY INTO OPS_RAW.GEO_ZONE_LKP FROM @OPS_RAW.SEED_LOAD_STAGE/geo_zone_lkp.csv.gz;
+COPY INTO OPS_RAW.MRC_PARTNER_MSTR FROM @OPS_RAW.SEED_LOAD_STAGE/mrc_partner_mstr.csv.gz;
+COPY INTO OPS_RAW.MRC_COMM_SCD2 FROM @OPS_RAW.SEED_LOAD_STAGE/mrc_comm_scd2.csv.gz;
+COPY INTO OPS_RAW.CUST_USER_MSTR FROM @OPS_RAW.SEED_LOAD_STAGE/cust_user_mstr.csv.gz;
+COPY INTO OPS_RAW.CRR_COURIER_MSTR FROM @OPS_RAW.SEED_LOAD_STAGE/crr_courier_mstr.csv.gz;
+COPY INTO OPS_RAW.DLV_ORD_HDR FROM @OPS_RAW.SEED_LOAD_STAGE/dlv_ord_hdr.csv.gz;
+COPY INTO OPS_RAW.DLV_ORD_ITEM_LN FROM @OPS_RAW.SEED_LOAD_STAGE/dlv_ord_item_ln.csv.gz;
+COPY INTO OPS_RAW.DSP_REFUND_FCT FROM @OPS_RAW.SEED_LOAD_STAGE/dsp_refund_fct.csv.gz;
+COPY INTO OPS_RAW.MRC_PAYOUT_LEDGER FROM @OPS_RAW.SEED_LOAD_STAGE/mrc_payout_ledger.csv.gz;
+COPY INTO OPS_RAW.ZNE_FLEET_SNAP FROM @OPS_RAW.SEED_LOAD_STAGE/zne_fleet_snap.csv.gz;
+
+-- Bulk COPY INTO for semi-structured VARIANT table
+COPY INTO IOT_RAW.APP_DELIVERY_PINGS (PING_ID, INGEST_TS, ORD_ID, PAYLOAD)
+FROM (
+    SELECT
+        $1:PING_ID::VARCHAR,
+        $1:INGEST_TS::TIMESTAMP_NTZ,
+        $1:ORD_ID::VARCHAR,
+        $1:PAYLOAD
+    FROM @IOT_RAW.IOT_LANDING_STAGE/app_delivery_pings.jsonl.gz
+)
+FILE_FORMAT = IOT_RAW.JSONL_GZIP_FMT;
+
+-- Snowpipe definition for continuous ingestion (migrated to Pub/Sub BQ Subscription)
+CREATE OR REPLACE PIPE IOT_RAW.PIPE_APP_DELIVERY_PINGS
+    AUTO_INGEST = FALSE
+    COMMENT = 'Continuous ingestion pipe for mobile & courier app JSON pings'
+AS
+COPY INTO IOT_RAW.APP_DELIVERY_PINGS (PING_ID, INGEST_TS, ORD_ID, PAYLOAD)
+FROM (
+    SELECT
+        $1:PING_ID::VARCHAR,
+        $1:INGEST_TS::TIMESTAMP_NTZ,
+        $1:ORD_ID::VARCHAR,
+        $1:PAYLOAD
+    FROM @IOT_RAW.IOT_LANDING_STAGE
+)
+FILE_FORMAT = IOT_RAW.JSONL_GZIP_FMT;

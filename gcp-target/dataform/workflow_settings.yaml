@@ -1,0 +1,8 @@
+defaultProject: dcd-migration-demo
+defaultLocation: us-central1
+defaultDataset: quickbite_gold_mart
+defaultAssertionDataset: quickbite_gold_mart_assertions
+dataformCoreVersion: 3.0.10
+vars:
+  rawOpsDataset: quickbite_raw_ops
+  rawIotDataset: quickbite_raw_iot

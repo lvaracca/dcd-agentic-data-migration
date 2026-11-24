@@ -1,0 +1,74 @@
+# ==============================================================================
+# Partial Legacy Snowflake Cortex Analyst Semantic Model (Abandoned Pilot)
+# Notice what is missing (and why their Cortex Analyst POC failed):
+#   - Covers only 3 of the 12 operational tables!
+#   - Uses Snowflake-specific IFF() syntax
+#   - Completely misses MRC_COMM_SCD2 (SCD Type 2 commissions), DSP_REFUND_FCT
+#     (refund deductions), ZNE_FLEET_SNAP (live courier fleet), and JSON pings!
+# Antigravity salvages these base definitions and merges them with the full
+# business logic extracted from SQL Views, Stored Procs & Snowpark into OKF v0.2.
+# ==============================================================================
+name: quickbite_basic_orders_pilot
+description: Initial incomplete semantic model for QuickBite delivery orders.
+
+tables:
+  - name: dlv_ord_hdr
+    base_table:
+      database: QUICKBITE_PROD
+      schema: OPS_RAW
+      table: DLV_ORD_HDR
+    dimensions:
+      - name: order_status
+        synonyms: ["status", "delivery state"]
+        expr: ORD_STS_CD
+        data_type: TEXT
+        description: "Order status code: D = Delivered, P = Preparing, C = Customer Cancelled, R = Merchant Rejected."
+      - name: marketplace_vertical
+        synonyms: ["vertical", "channel", "business line"]
+        expr: "IFF(VERT_CD = 1, 'Restaurant', 'Grocery')"
+        data_type: TEXT
+        description: "1 = Restaurant Hot Food delivery, 2 = Quick-Commerce Grocery dark stores."
+    time_dimensions:
+      - name: order_timestamp
+        expr: ORD_TS
+        data_type: TIMESTAMP
+    measures:
+      - name: gross_customer_fees
+        synonyms: ["delivery and service fees"]
+        expr: "IFF(ORD_STS_CD = 'D', DLV_FEE_USD + SRV_FEE_USD, 0)"
+        default_aggregation: sum
+        data_type: NUMBER
+      - name: courier_tips_pass_through
+        synonyms: ["driver tips", "rider tips"]
+        expr: "IFF(ORD_STS_CD = 'D', TIP_USD, 0)"
+        default_aggregation: sum
+        data_type: NUMBER
+        description: "Pass-through courier tips. Must NEVER be included in QuickBite Platform Net Revenue."
+
+  - name: dlv_ord_item_ln
+    base_table:
+      database: QUICKBITE_PROD
+      schema: OPS_RAW
+      table: DLV_ORD_ITEM_LN
+    measures:
+      - name: gross_merchandise_value
+        synonyms: ["GMV", "gross food sales", "basket value"]
+        expr: "QTY_N * UNIT_PRC_USD"
+        default_aggregation: sum
+        data_type: NUMBER
+        description: "Gross basket value of items before commissions, fees, vouchers, or refunds."
+
+  - name: geo_zone_lkp
+    base_table:
+      database: QUICKBITE_PROD
+      schema: OPS_RAW
+      table: GEO_ZONE_LKP
+    dimensions:
+      - name: region
+        synonyms: ["territory", "macro region"]
+        expr: REG_CD
+        data_type: TEXT
+      - name: city_zone
+        synonyms: ["city", "delivery zone"]
+        expr: CITY_NM
+        data_type: TEXT

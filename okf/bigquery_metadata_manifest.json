@@ -1,0 +1,151 @@
+{
+  "generated_from": [
+    "snowflake-source/03_streams_tasks_dynamic_tables.sql",
+    "snowflake-source/04_legacy_views_and_procs.sql",
+    "snowflake-source/snowpark/snowpark_merchant_fraud_scoring.py",
+    "snowflake-source/cortex-analyst/cortex_ops_model.yaml",
+    "bi-powerbi/QuickBite_Executive_Cockpit.SemanticModel/definition/tables/*.tmdl"
+  ],
+  "tables": [
+    {
+      "dataset": "quickbite_raw_ops",
+      "table": "DLV_ORD_HDR",
+      "description": "Order header fact table (Zero-Copy BigLake Iceberg). Grain: 1 row per delivery order (ORD_ID). Filter ORD_STS_CD = 'D' for realized revenue. WARNING: TIP_USD passes 100% to couriers and MUST NEVER be included in Platform Net Revenue.",
+      "columns": {
+        "ORD_ID": "Unique delivery order identifier (e.g., ORD-0000001). Primary key.",
+        "ORD_DT_SK": "Integer date surrogate key (YYYYMMDD) joining to SYS_CAL_DIM.DT_SK.",
+        "ORD_TS": "Order placement timestamp (UTC).",
+        "USR_ID": "Customer identifier joining to CUST_USER_MSTR.USR_ID.",
+        "MRC_ID": "Merchant partner identifier joining to MRC_PARTNER_MSTR.MRC_ID and MRC_COMM_SCD2.MRC_ID.",
+        "CRR_ID": "Assigned courier identifier joining to CRR_COURIER_MSTR.CRR_ID.",
+        "ZONE_ID": "Delivery zone identifier joining to GEO_ZONE_LKP.ZONE_ID.",
+        "VERT_CD": "Marketplace vertical code: 1 = Restaurant (Hot Food), 2 = Grocery (Quick-Commerce Dark Stores).",
+        "ORD_STS_CD": "Order lifecycle status code: D = Delivered (realized), P = Preparing, C = Customer Cancelled, R = Merchant Rejected.",
+        "DLV_FEE_USD": "Delivery fee paid by customer (USD). Included in Platform Net Revenue.",
+        "SRV_FEE_USD": "Platform service fee paid by customer (USD). Included in Platform Net Revenue.",
+        "TIP_USD": "Pass-through courier tip (USD). Goes 100% to couriers — NEVER include in Platform Net Revenue.",
+        "CRR_PAY_USD": "Courier payout cost paid by QuickBite (USD). Deducted from Platform Net Revenue.",
+        "PROMO_VOUCHER_USD": "QuickBite-funded promotional voucher subsidy (USD). Deducted from Platform Net Revenue."
+      }
+    },
+    {
+      "dataset": "quickbite_raw_ops",
+      "table": "DLV_ORD_ITEM_LN",
+      "description": "Order item line detail (Zero-Copy BigLake Iceberg). Grain: 1 row per item SKU line (ORD_LN_ID). GMV = SUM(QTY_N * UNIT_PRC_USD). ANTI-FANOUT RULE: Always pre-aggregate GMV at ORD_ID grain before joining DSP_REFUND_FCT.",
+      "columns": {
+        "ORD_LN_ID": "Unique order item line identifier.",
+        "ORD_ID": "Parent order identifier joining to DLV_ORD_HDR.ORD_ID.",
+        "QTY_N": "Item quantity ordered.",
+        "UNIT_PRC_USD": "Unit item price in USD. Basket GMV = SUM(QTY_N * UNIT_PRC_USD)."
+      }
+    },
+    {
+      "dataset": "quickbite_raw_ops",
+      "table": "MRC_COMM_SCD2",
+      "description": "Slowly Changing Dimension Type 2 (SCD2) merchant commission contract history. CRITICAL JOIN RULE: Always join on CAL_DT BETWEEN EFF_FROM_DT AND EFF_TO_DT. NEVER filter IS_CURR_FLG = 1 for historical revenue (causes +$127,296.80 Q3 2025 overstatement!).",
+      "columns": {
+        "MRC_ID": "Merchant partner identifier.",
+        "EFF_FROM_DT": "Contract effective start date (inclusive).",
+        "EFF_TO_DT": "Contract effective end date (inclusive; 9999-12-31 for active contract).",
+        "COMM_RATE_PCT": "Contracted merchant commission rate applied to Basket GMV (decimal, e.g., 0.24 = 24%).",
+        "IS_CURR_FLG": "1 = Currently active contract version, 0 = Historical version. Do NOT use IS_CURR_FLG = 1 for historical period calculations."
+      }
+    },
+    {
+      "dataset": "quickbite_raw_ops",
+      "table": "DSP_REFUND_FCT",
+      "description": "Customer dispute and refund events. Grain: 1 row per dispute ticket (DSP_ID). Filter RFND_STS_FLG = 1 for Approved Refunds. ANTI-FANOUT RULE: Pre-aggregate by ORD_ID before joining item lines (prevents 3.27x refund overcounting).",
+      "columns": {
+        "DSP_ID": "Unique dispute ticket identifier.",
+        "ORD_ID": "Disputed order identifier joining to DLV_ORD_HDR.ORD_ID.",
+        "RFND_AMT_USD": "Refund dollar amount requested/issued (USD). Sum only when RFND_STS_FLG = 1.",
+        "RFND_STS_FLG": "Refund status flag: 0 = Pending Review, 1 = Approved Refund (deducted from Net Revenue), 9 = Rejected Suspected Abuse.",
+        "DSP_RSN_CD": "Dispute reason code: 1 = Missing Item (Quality), 2 = Cold/Spilled Food (Quality), 3 = Extreme Late SLA, 4 = Suspected Refund Abuse.",
+        "CUST_TICKET_TXT": "Free-text customer support ticket message classified by BigQuery AI.CLASSIFY / AI.SCORE."
+      }
+    },
+    {
+      "dataset": "quickbite_raw_ops",
+      "table": "ZNE_FLEET_SNAP",
+      "description": "15-minute live courier fleet availability snapshots per delivery zone (Zero-Copy BigLake Iceberg). SNAPSHOT TRAP WARNING: ONLINE_CRR_N, BUSY_CRR_N, and UNASSIGNED_ORD_N are NON-ADDITIVE stock measures. NEVER SUM across SNAP_TS; always isolate the latest SNAP_TS per zone or query DT_LIVE_ZONE_SUPPLY_DEFICIT.",
+      "columns": {
+        "SNAP_TS": "15-minute fleet snapshot timestamp (UTC). Filter to MAX(SNAP_TS) per ZONE_ID.",
+        "ZONE_ID": "Delivery zone identifier.",
+        "ONLINE_CRR_N": "Point-in-time online couriers in zone (non-additive across time).",
+        "BUSY_CRR_N": "Point-in-time couriers actively on a delivery (non-additive across time).",
+        "UNASSIGNED_ORD_N": "Point-in-time waiting orders without an assigned courier."
+      }
+    },
+    {
+      "dataset": "quickbite_raw_ops",
+      "table": "MRC_PAYOUT_LEDGER",
+      "description": "Merchant payout settlements and dispute chargeback ledger (Zero-Copy BigLake Iceberg). HIDDEN JOIN RULE: Chargeback rows join to orders via CONCAT('CBK-', ORD_ID) = REF_DOC_TXT.",
+      "columns": {
+        "REF_DOC_TXT": "Reference document string: 'STL-...' for scheduled merchant payouts, 'CBK-<ORD_ID>' for dispute chargebacks.",
+        "LEDGER_AMT_USD": "Signed ledger amount (positive = payout credit, negative = chargeback deduction).",
+        "PYT_STS_FLG": "Payout status flag: 0 = Scheduled Payout, 1 = Paid/Settled, 9 = Held for Compliance Review."
+      }
+    },
+    {
+      "dataset": "quickbite_raw_ops",
+      "table": "SYS_CAL_DIM",
+      "description": "Corporate fiscal calendar dimension. IMPORTANT: QuickBite Fiscal Year starts on February 1st (FISC_YR_N / FISC_QTR_N differ from calendar quarters!).",
+      "columns": {
+        "DT_SK": "Integer date key (YYYYMMDD).",
+        "CAL_DT": "Calendar date (DATE).",
+        "FISC_YR_N": "QuickBite Fiscal Year (starts Feb 1).",
+        "FISC_QTR_N": "QuickBite Fiscal Quarter (Q1 = Feb-Apr, Q2 = May-Jul, Q3 = Aug-Oct, Q4 = Nov-Jan)."
+      }
+    },
+    {
+      "dataset": "quickbite_raw_iot",
+      "table": "APP_DELIVERY_PINGS",
+      "description": "Mobile delivery app telemetry pings migrated from Snowflake VARIANT to native BigQuery JSON. TELEMETRY BUG RULE: Always exclude LAX_STRING(PAYLOAD.app_ver) = '3.8.0-beta' (1,933 orders have corrupted GPS kitchen prep timers).",
+      "columns": {
+        "ORD_ID": "Order identifier joining to DLV_ORD_HDR.ORD_ID.",
+        "PAYLOAD": "Native BigQuery JSON telemetry document containing app_ver, stage ('DELIVERED'), metrics.prep_sec, metrics.travel_sec, metrics.eta_sec, and anomaly_flags."
+      }
+    },
+    {
+      "dataset": "quickbite_gold_mart",
+      "table": "FCT_PLATFORM_NET_REVENUE",
+      "description": "Certified Gold daily marketplace profitability fact table (Dataform + Power BI DirectQuery). Encodes SCD2 merchant commission lookup, anti-fanout approved refund deduction, and excludes pass-through courier tips. Official Benchmarks: Q3 2025 Calendar Restaurant Net Revenue = $153,150.49; FY25 Restaurant = $937,401.38; FY25 Grocery = $38,309.66.",
+      "columns": {
+        "CAL_DT": "Calendar date of delivered order.",
+        "FISC_YR_N": "QuickBite Fiscal Year (starts February 1).",
+        "FISC_QTR_N": "QuickBite Fiscal Quarter (1-4).",
+        "REG_CD": "Macro region code (EMEA, AMER, APAC).",
+        "VERTICAL_NM": "Marketplace vertical ('Restaurant' or 'Grocery').",
+        "GROSS_MERCHANDISE_VALUE_USD": "Total Gross Merchandise Value (GMV) of completed delivered orders (USD).",
+        "APPROVED_REFUNDS_USD": "Total approved customer refunds (RFND_STS_FLG = 1), deduplicated at order grain.",
+        "PLATFORM_NET_REVENUE_USD": "Official QuickBite Platform Net Revenue (Net Take): Merchant SCD2 Commission + Delivery & Service Fees - Courier Pay - Promo Vouchers - Approved Refunds (excludes Courier Tips).",
+        "EFFECTIVE_TAKE_RATE_PCT": "Platform Net Revenue divided by GMV (Power BI DAX: Effective Take-Rate %)."
+      }
+    },
+    {
+      "dataset": "quickbite_gold_mart",
+      "table": "DIM_PRIME_PARTNER_SCORECARD",
+      "description": "Certified Gold merchant tiering scorecard (Dataform + Power BI DirectQuery). A merchant earns IS_PRIME_PARTNER = TRUE iff trailing 90-day GMV > $25,000 AND avg kitchen prep < 14.0 min (excluding 3.8.0-beta) AND quality dispute rate < 2.0% AND rejection rate < 1.0%.",
+      "columns": {
+        "MRC_ID": "Unique merchant identifier.",
+        "TRAILING_90D_GMV_USD": "Completed delivered GMV over trailing 90 days (USD).",
+        "AVG_PREP_MIN_90D": "Clean average kitchen prep time in minutes over trailing 90 days (excludes app_ver 3.8.0-beta).",
+        "QUALITY_DISPUTE_RATE": "Share of delivered orders with approved quality disputes (DSP_RSN_CD IN (1,2) AND RFND_STS_FLG = 1).",
+        "MERCHANT_REJECTION_RATE": "Share of total orders rejected by merchant (ORD_STS_CD = 'R').",
+        "IS_PRIME_PARTNER": "Boolean flag: TRUE when merchant satisfies all 4 corporate Prime Partner criteria."
+      }
+    },
+    {
+      "dataset": "quickbite_gold_mart",
+      "table": "DT_LIVE_ZONE_SUPPLY_DEFICIT",
+      "description": "Certified Gold live courier supply deficit mart (migrated from Snowflake Dynamic Table; Power BI DirectQuery). Safely isolated to the latest fleet snapshot per zone (avoids Snapshot Trap). Critical Deficit Zone threshold: SUPPLY_DEFICIT_RATIO >= 2.50.",
+      "columns": {
+        "LATEST_SNAP_TS": "Latest 15-minute fleet snapshot timestamp per zone.",
+        "ONLINE_CRR_N": "Latest live online couriers count in the zone.",
+        "IDLE_CRR_N": "Available idle couriers (ONLINE_CRR_N - BUSY_CRR_N).",
+        "UNASSIGNED_ORD_N": "Current unassigned delivery orders waiting for dispatch.",
+        "SUPPLY_DEFICIT_RATIO": "Unassigned orders divided by idle couriers. >= 2.50 triggers Critical Surge Dispatch Alert."
+      }
+    }
+  ]
+}

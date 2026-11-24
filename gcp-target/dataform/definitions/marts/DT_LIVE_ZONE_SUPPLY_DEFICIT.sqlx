@@ -1,0 +1,32 @@
+config {
+  type: "table",
+  name: "DT_LIVE_ZONE_SUPPLY_DEFICIT",
+  description: "Migrated from Snowflake Dynamic Table DT_LIVE_ZONE_SUPPLY_DEFICIT. Prevents Snapshot Trap by isolating only the latest SNAP_TS per zone.",
+  assertions: {
+    uniqueKey: ["ZONE_ID"],
+    nonNull: ["ZONE_ID", "LATEST_SNAP_TS"]
+  },
+  tags: ["tier2_marts", "powerbi_gold", "migrated_from_dynamic_table"]
+}
+
+SELECT
+  s.SNAP_TS AS LATEST_SNAP_TS,
+  s.ZONE_ID,
+  z.CITY_NM,
+  z.CNTRY_CD,
+  z.REG_CD,
+  s.ONLINE_CRR_N,
+  s.BUSY_CRR_N,
+  (s.ONLINE_CRR_N - s.BUSY_CRR_N) AS IDLE_CRR_N,
+  s.UNASSIGNED_ORD_N,
+  ROUND(
+    SAFE_DIVIDE(
+      CAST(s.UNASSIGNED_ORD_N AS FLOAT64),
+      CAST(NULLIF(GREATEST(s.ONLINE_CRR_N - s.BUSY_CRR_N, 0), 0) AS FLOAT64)
+    ),
+    2
+  ) AS SUPPLY_DEFICIT_RATIO
+FROM ${ref("quickbite_raw_ops", "ZNE_FLEET_SNAP")} s
+JOIN ${ref("quickbite_raw_ops", "GEO_ZONE_LKP")} z
+  ON s.ZONE_ID = z.ZONE_ID
+QUALIFY RANK() OVER (PARTITION BY s.ZONE_ID ORDER BY s.SNAP_TS DESC) = 1

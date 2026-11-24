@@ -1,0 +1,64 @@
+config {
+  type: "table",
+  name: "FCT_PLATFORM_NET_REVENUE",
+  description: "Migrated from Snowflake TSK_02A_MART_NET_REVENUE. Daily Marketplace Net Revenue using exact SCD Type 2 merchant commission lookup (CAL_DT BETWEEN EFF_FROM_DT AND EFF_TO_DT), anti-fanout refund deduction, and excluding courier tips.",
+  bigquery: {
+    partitionBy: "CAL_DT",
+    clusterBy: ["REG_CD", "VERT_CD"]
+  },
+  assertions: {
+    nonNull: ["CAL_DT", "ZONE_ID", "VERT_CD", "PLATFORM_NET_REVENUE_USD"]
+  },
+  tags: ["tier2_marts", "powerbi_gold", "migrated_from_snowflake_tasks"]
+}
+
+SELECT
+  cal.CAL_DT,
+  cal.FISC_YR_N,
+  cal.FISC_QTR_N,
+  z.REG_CD,
+  z.CITY_NM,
+  s.ZONE_ID,
+  s.VERT_CD,
+  IF(s.VERT_CD = 1, 'Restaurant', 'Grocery') AS VERTICAL_NM,
+  COUNT(DISTINCT s.ORD_ID) AS COMPLETED_ORDERS_CNT,
+  SUM(s.GMV_USD) AS GROSS_MERCHANDISE_VALUE_USD,
+  SUM(ROUND(s.GMV_USD * CAST(scd.COMM_RATE_PCT AS NUMERIC), 2)) AS MERCHANT_COMMISSION_REV_USD,
+  SUM(s.DLV_FEE_USD + s.SRV_FEE_USD) AS CUSTOMER_FEES_REV_USD,
+  SUM(s.CRR_PAY_USD) AS COURIER_COST_USD,
+  SUM(s.PROMO_VOUCHER_USD) AS PROMO_SUBSIDY_USD,
+  SUM(COALESCE(d.APPROVED_REFUND_USD, NUMERIC '0')) AS APPROVED_REFUNDS_USD,
+  SUM(
+    ROUND(s.GMV_USD * CAST(scd.COMM_RATE_PCT AS NUMERIC), 2)
+    + s.DLV_FEE_USD
+    + s.SRV_FEE_USD
+    - s.CRR_PAY_USD
+    - s.PROMO_VOUCHER_USD
+    - COALESCE(d.APPROVED_REFUND_USD, NUMERIC '0')
+  ) AS PLATFORM_NET_REVENUE_USD,
+  ROUND(
+    SAFE_DIVIDE(
+      CAST(SUM(
+        ROUND(s.GMV_USD * CAST(scd.COMM_RATE_PCT AS NUMERIC), 2)
+        + s.DLV_FEE_USD
+        + s.SRV_FEE_USD
+        - s.CRR_PAY_USD
+        - s.PROMO_VOUCHER_USD
+        - COALESCE(d.APPROVED_REFUND_USD, NUMERIC '0')
+      ) AS FLOAT64),
+      CAST(SUM(s.GMV_USD) AS FLOAT64)
+    ),
+    4
+  ) AS EFFECTIVE_TAKE_RATE_PCT
+FROM ${ref("STG_ORDER_BASKETS")} s
+JOIN ${ref("quickbite_raw_ops", "SYS_CAL_DIM")} cal
+  ON s.ORD_DT_SK = cal.DT_SK
+JOIN ${ref("quickbite_raw_ops", "GEO_ZONE_LKP")} z
+  ON s.ZONE_ID = z.ZONE_ID
+JOIN ${ref("quickbite_raw_ops", "MRC_COMM_SCD2")} scd
+  ON s.MRC_ID = scd.MRC_ID
+ AND cal.CAL_DT BETWEEN scd.EFF_FROM_DT AND scd.EFF_TO_DT
+LEFT JOIN ${ref("STG_ORDER_DISPUTES_AGG")} d
+  ON s.ORD_ID = d.ORD_ID
+WHERE s.ORD_STS_CD = 'D'
+GROUP BY 1, 2, 3, 4, 5, 6, 7, 8

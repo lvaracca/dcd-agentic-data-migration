@@ -1,0 +1,22 @@
+# Python & Virtual Environments
+.venv/
+__pycache__/
+*.py[cod]
+
+# Secrets & Local Config
+.env
+*.pem
+*.p8
+
+# Generated Data Files (reproducible via data-generator/generate_quickbite_data.py)
+data-generator/output/*.csv.gz
+data-generator/output/*.jsonl.gz
+
+# Terraform & Dataform local state
+gcp-target/terraform/.terraform/
+gcp-target/terraform/*.tfstate*
+gcp-target/dataform/.df-credentials.json
+gcp-target/dataform/node_modules/
+
+# OS
+.DS_Store

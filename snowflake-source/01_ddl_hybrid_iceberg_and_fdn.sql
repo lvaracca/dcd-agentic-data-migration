@@ -1,0 +1,148 @@
+-- =============================================================================
+-- QuickBite Snowflake Source Setup — Step 1: Hybrid DDL (4 Iceberg + 8 Native FDN)
+-- Intentionally omits verbose column comments on raw tables to simulate a real
+-- undocumented legacy marketplace database.
+-- =============================================================================
+USE ROLE ACCOUNTADMIN;
+USE WAREHOUSE QB_LOAD_WH;
+USE DATABASE QUICKBITE_PROD;
+
+-- =============================================================================
+-- PART A: 4 HIGH-VOLUME OPERATIONAL TABLES AS APACHE ICEBERG ON GCS
+--         (Target on GCP: Zero-Copy BigLake Iceberg Tables in BigQuery)
+-- =============================================================================
+
+CREATE OR REPLACE ICEBERG TABLE OPS_RAW.DLV_ORD_HDR (
+    ORD_ID STRING,
+    ORD_DT_SK INT,
+    ORD_TS TIMESTAMP_NTZ(6),
+    USR_ID STRING,
+    MRC_ID STRING,
+    CRR_ID STRING,
+    ZONE_ID STRING,
+    VERT_CD INT,
+    ORD_STS_CD STRING,
+    DLV_FEE_USD NUMBER(10, 2),
+    SRV_FEE_USD NUMBER(10, 2),
+    TIP_USD NUMBER(10, 2),
+    CRR_PAY_USD NUMBER(10, 2),
+    PROMO_VOUCHER_USD NUMBER(10, 2)
+)
+    CATALOG = 'SNOWFLAKE'
+    EXTERNAL_VOLUME = 'QUICKBITE_GCS_ICEBERG_VOL'
+    BASE_LOCATION = 'ops_raw/dlv_ord_hdr';
+
+CREATE OR REPLACE ICEBERG TABLE OPS_RAW.DLV_ORD_ITEM_LN (
+    ORD_LN_ID STRING,
+    ORD_ID STRING,
+    ITEM_SKU STRING,
+    ITEM_NM STRING,
+    QTY_N INT,
+    UNIT_PRC_USD NUMBER(10, 2)
+)
+    CATALOG = 'SNOWFLAKE'
+    EXTERNAL_VOLUME = 'QUICKBITE_GCS_ICEBERG_VOL'
+    BASE_LOCATION = 'ops_raw/dlv_ord_item_ln';
+
+CREATE OR REPLACE ICEBERG TABLE OPS_RAW.ZNE_FLEET_SNAP (
+    SNAP_TS TIMESTAMP_NTZ(6),
+    ZONE_ID STRING,
+    ONLINE_CRR_N INT,
+    BUSY_CRR_N INT,
+    UNASSIGNED_ORD_N INT
+)
+    CATALOG = 'SNOWFLAKE'
+    EXTERNAL_VOLUME = 'QUICKBITE_GCS_ICEBERG_VOL'
+    BASE_LOCATION = 'ops_raw/zne_fleet_snap';
+
+CREATE OR REPLACE ICEBERG TABLE OPS_RAW.MRC_PAYOUT_LEDGER (
+    LEDGER_ID STRING,
+    REF_DOC_TXT STRING,
+    MRC_ID STRING,
+    ISSUE_DT DATE,
+    PAID_DT DATE,
+    LEDGER_AMT_USD NUMBER(12, 2),
+    PYT_STS_FLG INT
+)
+    CATALOG = 'SNOWFLAKE'
+    EXTERNAL_VOLUME = 'QUICKBITE_GCS_ICEBERG_VOL'
+    BASE_LOCATION = 'ops_raw/mrc_payout_ledger';
+
+-- =============================================================================
+-- PART B: 8 PROPRIETARY SNOWFLAKE NATIVE TABLES (FDN + VARIANT + CLUSTERING)
+--         (Target on GCP: Native Partitioned/Clustered BigQuery + Native JSON)
+-- =============================================================================
+
+CREATE OR REPLACE TABLE OPS_RAW.SYS_CAL_DIM (
+    DT_SK NUMBER(8, 0),
+    CAL_DT DATE,
+    ISO_WK_N NUMBER(2, 0),
+    FISC_YR_N NUMBER(4, 0),
+    FISC_QTR_N NUMBER(1, 0),
+    IS_PEAK_HOLIDAY NUMBER(1, 0)
+) DATA_RETENTION_TIME_IN_DAYS = 7;
+
+CREATE OR REPLACE TABLE OPS_RAW.GEO_ZONE_LKP (
+    ZONE_ID VARCHAR(20),
+    CITY_NM VARCHAR(80),
+    CNTRY_CD VARCHAR(4),
+    REG_CD VARCHAR(10),
+    SLA_TARGET_MIN NUMBER(4, 0)
+);
+
+CREATE OR REPLACE TABLE OPS_RAW.MRC_PARTNER_MSTR (
+    MRC_ID VARCHAR(20),
+    MRC_NM VARCHAR(120),
+    VERT_CD NUMBER(2, 0),
+    CUISINE_CAT VARCHAR(60),
+    ZONE_ID VARCHAR(20),
+    ONBOARD_DT DATE,
+    ACTIVE_FLG NUMBER(1, 0)
+) CLUSTER BY (ZONE_ID, VERT_CD);
+
+CREATE OR REPLACE TABLE OPS_RAW.MRC_COMM_SCD2 (
+    MRC_ID VARCHAR(20),
+    EFF_FROM_DT DATE,
+    EFF_TO_DT DATE,
+    COMM_RATE_PCT NUMBER(6, 4),
+    PKG_FEE_USD NUMBER(8, 2),
+    IS_CURR_FLG NUMBER(1, 0)
+);
+
+CREATE OR REPLACE TABLE OPS_RAW.CUST_USER_MSTR (
+    USR_ID VARCHAR(24),
+    F_NM VARCHAR(60),
+    L_NM VARCHAR(60),
+    EMAIL_TXT VARCHAR(150),
+    PHONE_TXT VARCHAR(40),
+    SIGNUP_DT DATE,
+    HOME_ZONE_ID VARCHAR(20),
+    QB_PASS_FLG NUMBER(1, 0)
+);
+
+CREATE OR REPLACE TABLE OPS_RAW.CRR_COURIER_MSTR (
+    CRR_ID VARCHAR(20),
+    CRR_FULL_NM VARCHAR(120),
+    PHONE_TXT VARCHAR(40),
+    VEH_TP_CD VARCHAR(10),
+    HOME_ZONE_ID VARCHAR(20),
+    ACTIVE_FLG NUMBER(1, 0)
+);
+
+CREATE OR REPLACE TABLE OPS_RAW.DSP_REFUND_FCT (
+    DSP_ID VARCHAR(24),
+    ORD_ID VARCHAR(24),
+    DSP_TS TIMESTAMP_NTZ,
+    RFND_AMT_USD NUMBER(10, 2),
+    RFND_STS_FLG NUMBER(2, 0),
+    DSP_RSN_CD NUMBER(2, 0),
+    CUST_TICKET_TXT VARCHAR(1000)
+) CLUSTER BY (TO_DATE(DSP_TS), DSP_RSN_CD);
+
+-- Semi-structured JSON Telemetry Table using Snowflake Proprietary VARIANT
+CREATE OR REPLACE TABLE IOT_RAW.APP_DELIVERY_PINGS (
+    PING_ID VARCHAR(30),
+    INGEST_TS TIMESTAMP_NTZ,
+    ORD_ID VARCHAR(24),
+    PAYLOAD VARIANT
+) CLUSTER BY (TO_DATE(INGEST_TS));

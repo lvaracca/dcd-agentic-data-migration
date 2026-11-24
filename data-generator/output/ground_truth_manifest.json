@@ -1,0 +1,61 @@
+{
+  "seed": 42,
+  "generated_at_utc": "2026-11-18T10:32:54.014732+00:00",
+  "total_rows": 624924,
+  "table_row_counts": {
+    "OPS_RAW.SYS_CAL_DIM": 1096,
+    "OPS_RAW.GEO_ZONE_LKP": 36,
+    "OPS_RAW.MRC_PARTNER_MSTR": 400,
+    "OPS_RAW.MRC_COMM_SCD2": 1100,
+    "OPS_RAW.CUST_USER_MSTR": 30000,
+    "OPS_RAW.CRR_COURIER_MSTR": 2500,
+    "OPS_RAW.DLV_ORD_HDR": 90000,
+    "OPS_RAW.DLV_ORD_ITEM_LN": 277146,
+    "OPS_RAW.DSP_REFUND_FCT": 6243,
+    "OPS_RAW.MRC_PAYOUT_LEDGER": 13746,
+    "IOT_RAW.APP_DELIVERY_PINGS": 142285,
+    "OPS_RAW.ZNE_FLEET_SNAP": 60372
+  },
+  "demo_ground_truth_benchmarks": {
+    "q3_2025_calendar_restaurants_true_net_revenue_usd": "153150.49",
+    "q3_2025_calendar_restaurants_naive_current_comm_net_revenue_usd": "280447.29",
+    "q3_2025_scd2_trap_overstatement_delta_usd": "127296.80",
+    "fy2025_fiscal_net_revenue_restaurants_usd": "937401.38",
+    "fy2025_fiscal_net_revenue_grocery_usd": "38309.66",
+    "all_time_true_approved_refunds_usd": "248632.85",
+    "all_time_fanout_corrupted_refunds_usd": "813512.14",
+    "lon01_latest_online_couriers": 95,
+    "lon01_snapshot_trap_summed_online_couriers": 76734,
+    "top_3_supply_deficit_zones_at_latest_snapshot": [
+      {
+        "zone_id": "ZNE-LON-01",
+        "city_nm": "London - Downtown",
+        "online": 95,
+        "busy": 89,
+        "idle": 6,
+        "unassigned": 33,
+        "supply_deficit_ratio": 5.5
+      },
+      {
+        "zone_id": "ZNE-NYC-01",
+        "city_nm": "New York - Downtown",
+        "online": 110,
+        "busy": 102,
+        "idle": 8,
+        "unassigned": 36,
+        "supply_deficit_ratio": 4.5
+      },
+      {
+        "zone_id": "ZNE-PAR-01",
+        "city_nm": "Paris - Downtown",
+        "online": 84,
+        "busy": 76,
+        "idle": 8,
+        "unassigned": 26,
+        "supply_deficit_ratio": 3.25
+      }
+    ],
+    "planted_serial_refund_abusers_count": 45,
+    "app_ver_3_8_0_beta_timer_bug_orders": 1933
+  }
+}

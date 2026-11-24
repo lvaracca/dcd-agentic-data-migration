@@ -1,0 +1,44 @@
+config {
+  type: "table",
+  name: "STG_ORDER_BASKETS",
+  description: "Migrated from Snowflake TSK_01A_STAGE_ORDERS. Pre-aggregates basket GMV at ORD_ID grain to prevent line-item fan-out.",
+  bigquery: {
+    partitionBy: "ORD_DT",
+    clusterBy: ["VERT_CD", "ORD_STS_CD"]
+  },
+  assertions: {
+    uniqueKey: ["ORD_ID"],
+    nonNull: ["ORD_ID", "GMV_USD"]
+  },
+  tags: ["tier1_staging", "migrated_from_snowflake_tasks"]
+}
+
+WITH basket AS (
+  SELECT
+    ORD_ID,
+    SUM(CAST(QTY_N AS NUMERIC) * CAST(UNIT_PRC_USD AS NUMERIC)) AS GMV_USD,
+    SUM(QTY_N) AS TOTAL_ITEMS_N
+  FROM ${ref("quickbite_raw_ops", "DLV_ORD_ITEM_LN")}
+  GROUP BY ORD_ID
+)
+SELECT
+  h.ORD_ID,
+  h.ORD_DT_SK,
+  h.ORD_TS,
+  DATE(h.ORD_TS) AS ORD_DT,
+  h.USR_ID,
+  h.MRC_ID,
+  h.CRR_ID,
+  h.ZONE_ID,
+  h.VERT_CD,
+  h.ORD_STS_CD,
+  COALESCE(b.GMV_USD, NUMERIC '0') AS GMV_USD,
+  COALESCE(b.TOTAL_ITEMS_N, 0) AS TOTAL_ITEMS_N,
+  CAST(h.DLV_FEE_USD AS NUMERIC) AS DLV_FEE_USD,
+  CAST(h.SRV_FEE_USD AS NUMERIC) AS SRV_FEE_USD,
+  CAST(h.TIP_USD AS NUMERIC) AS TIP_USD,
+  CAST(h.CRR_PAY_USD AS NUMERIC) AS CRR_PAY_USD,
+  CAST(h.PROMO_VOUCHER_USD AS NUMERIC) AS PROMO_VOUCHER_USD
+FROM ${ref("quickbite_raw_ops", "DLV_ORD_HDR")} h
+LEFT JOIN basket b
+  ON h.ORD_ID = b.ORD_ID

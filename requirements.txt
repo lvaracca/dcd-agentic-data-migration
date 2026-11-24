@@ -1,0 +1,8 @@
+cffi==2.1.1
+cryptography==50.0.2
+protobuf==6.33.6
+pycparser==3.12
+python-dotenv==1.2.4
+pytz==2026.6
+snowflake-connector-python==5.2.0
+tomlkit==0.15.2

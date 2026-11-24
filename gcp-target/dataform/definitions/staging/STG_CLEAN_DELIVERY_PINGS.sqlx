@@ -1,0 +1,27 @@
+config {
+  type: "table",
+  name: "STG_CLEAN_DELIVERY_PINGS",
+  description: "Migrated from Snowflake TSK_01B_PARSE_PINGS. Parses native BigQuery JSON telemetry and excludes corrupted app_ver = '3.8.0-beta' GPS timers.",
+  bigquery: {
+    partitionBy: "DATE(DELIVERED_PING_TS)",
+    clusterBy: ["ORD_ID"]
+  },
+  assertions: {
+    uniqueKey: ["ORD_ID"],
+    nonNull: ["ORD_ID", "DELIVERED_PING_TS"]
+  },
+  tags: ["tier1_staging", "migrated_from_snowflake_tasks"]
+}
+
+SELECT
+  p.ORD_ID,
+  p.INGEST_TS AS DELIVERED_PING_TS,
+  LAX_STRING(p.PAYLOAD.app_ver) AS APP_VER,
+  LAX_INT64(p.PAYLOAD.metrics.prep_sec) AS KITCHEN_PREP_SEC,
+  LAX_INT64(p.PAYLOAD.metrics.travel_sec) AS COURIER_TRAVEL_SEC,
+  LAX_INT64(p.PAYLOAD.metrics.eta_sec) AS QUOTED_ETA_SEC,
+  'SLA_EXCEEDED' IN UNNEST(JSON_VALUE_ARRAY(p.PAYLOAD.anomaly_flags)) AS HAS_SLA_EXCEEDED_FLAG
+FROM ${ref("quickbite_raw_iot", "APP_DELIVERY_PINGS")} p
+WHERE LAX_STRING(p.PAYLOAD.stage) = 'DELIVERED'
+  AND LAX_STRING(p.PAYLOAD.app_ver) != '3.8.0-beta'
+QUALIFY ROW_NUMBER() OVER (PARTITION BY p.ORD_ID ORDER BY p.INGEST_TS DESC) = 1

@@ -1,0 +1,56 @@
+config {
+  type: "view",
+  name: "VW_DELIVERY_SLA_TELEMETRY",
+  description: "Migrated from Snowflake VW_DELIVERY_SLA_TELEMETRY (converts VARIANT FLATTEN and ASOF JOIN to deterministic BigQuery JSON + QUALIFY).",
+  tags: ["tier2_marts", "migrated_from_snowflake_views"]
+}
+
+WITH flattened_flags AS (
+  SELECT
+    p.ORD_ID,
+    STRING_AGG(DISTINCT flag, ',' ORDER BY flag) AS ANOMALY_FLAGS_CSV
+  FROM ${ref("quickbite_raw_iot", "APP_DELIVERY_PINGS")} p,
+  UNNEST(JSON_VALUE_ARRAY(p.PAYLOAD.anomaly_flags)) AS flag
+  WHERE LAX_STRING(p.PAYLOAD.app_ver) != '3.8.0-beta'
+  GROUP BY p.ORD_ID
+),
+asof_disputes AS (
+  SELECT
+    lp.ORD_ID,
+    d.DSP_ID
+  FROM ${ref("STG_CLEAN_DELIVERY_PINGS")} lp
+  JOIN ${ref("quickbite_raw_ops", "DSP_REFUND_FCT")} d
+    ON lp.ORD_ID = d.ORD_ID
+   AND lp.DELIVERED_PING_TS <= TIMESTAMP(d.DSP_TS)
+  QUALIFY ROW_NUMBER() OVER (PARTITION BY lp.ORD_ID ORDER BY d.DSP_TS ASC) = 1
+)
+SELECT
+  h.MRC_ID,
+  h.ZONE_ID,
+  z.CITY_NM,
+  z.REG_CD,
+  DATE(h.ORD_TS) AS ORD_DAY,
+  COUNT(DISTINCT h.ORD_ID) AS MEASURED_ORDERS_CNT,
+  ROUND(AVG(lp.KITCHEN_PREP_SEC / 60.0), 2) AS AVG_KITCHEN_PREP_MIN,
+  ROUND(AVG((lp.KITCHEN_PREP_SEC + lp.COURIER_TRAVEL_SEC) / 60.0), 2) AS AVG_TOTAL_DELIVERY_MIN,
+  COUNTIF((lp.KITCHEN_PREP_SEC + lp.COURIER_TRAVEL_SEC) > z.SLA_TARGET_MIN * 60) AS SLA_BREACH_CNT,
+  ROUND(
+    SAFE_DIVIDE(
+      COUNTIF((lp.KITCHEN_PREP_SEC + lp.COURIER_TRAVEL_SEC) > z.SLA_TARGET_MIN * 60),
+      COUNT(DISTINCT h.ORD_ID)
+    ),
+    4
+  ) AS SLA_BREACH_RATE,
+  COUNT(DISTINCT ad.DSP_ID) AS POST_DELIVERY_DISPUTE_CNT,
+  COUNTIF(ff.ANOMALY_FLAGS_CSV LIKE '%SLA_EXCEEDED%') AS TELEMETRY_FLAGGED_SLA_CNT
+FROM ${ref("quickbite_raw_ops", "DLV_ORD_HDR")} h
+JOIN ${ref("quickbite_raw_ops", "GEO_ZONE_LKP")} z
+  ON h.ZONE_ID = z.ZONE_ID
+JOIN ${ref("STG_CLEAN_DELIVERY_PINGS")} lp
+  ON h.ORD_ID = lp.ORD_ID
+LEFT JOIN flattened_flags ff
+  ON h.ORD_ID = ff.ORD_ID
+LEFT JOIN asof_disputes ad
+  ON h.ORD_ID = ad.ORD_ID
+WHERE h.ORD_STS_CD = 'D'
+GROUP BY 1, 2, 3, 4, 5

@@ -1,0 +1,327 @@
+{
+  "tables_and_views": [
+    {
+      "TABLE_SCHEMA": "IOT_RAW",
+      "TABLE_NAME": "APP_DELIVERY_PINGS",
+      "TABLE_TYPE": "BASE TABLE",
+      "IS_ICEBERG": "NO",
+      "ROW_COUNT": 142285,
+      "BYTES": 3547648,
+      "CLUSTERING_KEY": "LINEAR(TO_DATE(INGEST_TS))"
+    },
+    {
+      "TABLE_SCHEMA": "MART",
+      "TABLE_NAME": "DIM_PRIME_PARTNER_SCORECARD",
+      "TABLE_TYPE": "BASE TABLE",
+      "IS_ICEBERG": "NO",
+      "ROW_COUNT": 400,
+      "BYTES": 15360,
+      "CLUSTERING_KEY": null
+    },
+    {
+      "TABLE_SCHEMA": "MART",
+      "TABLE_NAME": "DT_LIVE_ZONE_SUPPLY_DEFICIT",
+      "TABLE_TYPE": "BASE TABLE",
+      "IS_ICEBERG": "NO",
+      "ROW_COUNT": 36,
+      "BYTES": 3584,
+      "CLUSTERING_KEY": null
+    },
+    {
+      "TABLE_SCHEMA": "MART",
+      "TABLE_NAME": "FCT_DAILY_REGION_DEMAND_TRAIN",
+      "TABLE_TYPE": "BASE TABLE",
+      "IS_ICEBERG": "NO",
+      "ROW_COUNT": 912,
+      "BYTES": 6656,
+      "CLUSTERING_KEY": null
+    },
+    {
+      "TABLE_SCHEMA": "MART",
+      "TABLE_NAME": "FCT_PLATFORM_NET_REVENUE",
+      "TABLE_TYPE": "BASE TABLE",
+      "IS_ICEBERG": "NO",
+      "ROW_COUNT": 30704,
+      "BYTES": 747520,
+      "CLUSTERING_KEY": null
+    },
+    {
+      "TABLE_SCHEMA": "MART",
+      "TABLE_NAME": "FCT_REGIONAL_ORDER_FORECAST_14D",
+      "TABLE_TYPE": "BASE TABLE",
+      "IS_ICEBERG": "NO",
+      "ROW_COUNT": 42,
+      "BYTES": 2560,
+      "CLUSTERING_KEY": null
+    },
+    {
+      "TABLE_SCHEMA": "MART",
+      "TABLE_NAME": "RPT_PBI_EXECUTIVE_SUMMARY",
+      "TABLE_TYPE": "BASE TABLE",
+      "IS_ICEBERG": "NO",
+      "ROW_COUNT": 144,
+      "BYTES": 3584,
+      "CLUSTERING_KEY": null
+    },
+    {
+      "TABLE_SCHEMA": "MART",
+      "TABLE_NAME": "STG_CLEAN_DELIVERY_PINGS",
+      "TABLE_TYPE": "BASE TABLE",
+      "IS_ICEBERG": "NO",
+      "ROW_COUNT": 80937,
+      "BYTES": 1455616,
+      "CLUSTERING_KEY": null
+    },
+    {
+      "TABLE_SCHEMA": "MART",
+      "TABLE_NAME": "STG_ORDER_BASKETS",
+      "TABLE_TYPE": "BASE TABLE",
+      "IS_ICEBERG": "NO",
+      "ROW_COUNT": 90000,
+      "BYTES": 2869760,
+      "CLUSTERING_KEY": null
+    },
+    {
+      "TABLE_SCHEMA": "MART",
+      "TABLE_NAME": "STG_ORDER_DISPUTES_AGG",
+      "TABLE_TYPE": "BASE TABLE",
+      "IS_ICEBERG": "NO",
+      "ROW_COUNT": 6243,
+      "BYTES": 55808,
+      "CLUSTERING_KEY": null
+    },
+    {
+      "TABLE_SCHEMA": "MART",
+      "TABLE_NAME": "USER_FRAUD_RISK_SCORES",
+      "TABLE_TYPE": "BASE TABLE",
+      "IS_ICEBERG": "NO",
+      "ROW_COUNT": 28046,
+      "BYTES": 401408,
+      "CLUSTERING_KEY": null
+    },
+    {
+      "TABLE_SCHEMA": "MART",
+      "TABLE_NAME": "VW_DAILY_REGION_DEMAND_TRAIN",
+      "TABLE_TYPE": "VIEW",
+      "IS_ICEBERG": "NO",
+      "ROW_COUNT": null,
+      "BYTES": null,
+      "CLUSTERING_KEY": null
+    },
+    {
+      "TABLE_SCHEMA": "MART",
+      "TABLE_NAME": "VW_DELIVERY_SLA_TELEMETRY",
+      "TABLE_TYPE": "VIEW",
+      "IS_ICEBERG": "NO",
+      "ROW_COUNT": null,
+      "BYTES": null,
+      "CLUSTERING_KEY": null
+    },
+    {
+      "TABLE_SCHEMA": "MART",
+      "TABLE_NAME": "VW_PLATFORM_NET_REVENUE",
+      "TABLE_TYPE": "VIEW",
+      "IS_ICEBERG": "NO",
+      "ROW_COUNT": null,
+      "BYTES": null,
+      "CLUSTERING_KEY": null
+    },
+    {
+      "TABLE_SCHEMA": "MART",
+      "TABLE_NAME": "VW_PRIME_PARTNER_SCORECARD",
+      "TABLE_TYPE": "VIEW",
+      "IS_ICEBERG": "NO",
+      "ROW_COUNT": null,
+      "BYTES": null,
+      "CLUSTERING_KEY": null
+    },
+    {
+      "TABLE_SCHEMA": "OPS_RAW",
+      "TABLE_NAME": "CDC_DLV_ORD_HDR",
+      "TABLE_TYPE": "BASE TABLE",
+      "IS_ICEBERG": "NO",
+      "ROW_COUNT": 1,
+      "BYTES": 2048,
+      "CLUSTERING_KEY": null
+    },
+    {
+      "TABLE_SCHEMA": "OPS_RAW",
+      "TABLE_NAME": "CDC_DLV_ORD_ITEM_LN",
+      "TABLE_TYPE": "BASE TABLE",
+      "IS_ICEBERG": "NO",
+      "ROW_COUNT": 1,
+      "BYTES": 1536,
+      "CLUSTERING_KEY": null
+    },
+    {
+      "TABLE_SCHEMA": "OPS_RAW",
+      "TABLE_NAME": "CDC_DSP_REFUND_FCT",
+      "TABLE_TYPE": "BASE TABLE",
+      "IS_ICEBERG": "NO",
+      "ROW_COUNT": 0,
+      "BYTES": 0,
+      "CLUSTERING_KEY": null
+    },
+    {
+      "TABLE_SCHEMA": "OPS_RAW",
+      "TABLE_NAME": "CRR_COURIER_MSTR",
+      "TABLE_TYPE": "BASE TABLE",
+      "IS_ICEBERG": "NO",
+      "ROW_COUNT": 2500,
+      "BYTES": 46080,
+      "CLUSTERING_KEY": null
+    },
+    {
+      "TABLE_SCHEMA": "OPS_RAW",
+      "TABLE_NAME": "CUST_USER_MSTR",
+      "TABLE_TYPE": "BASE TABLE",
+      "IS_ICEBERG": "NO",
+      "ROW_COUNT": 30000,
+      "BYTES": 796672,
+      "CLUSTERING_KEY": null
+    },
+    {
+      "TABLE_SCHEMA": "OPS_RAW",
+      "TABLE_NAME": "DLV_ORD_HDR",
+      "TABLE_TYPE": "BASE TABLE",
+      "IS_ICEBERG": "YES",
+      "ROW_COUNT": 90000,
+      "BYTES": 1573376,
+      "CLUSTERING_KEY": null
+    },
+    {
+      "TABLE_SCHEMA": "OPS_RAW",
+      "TABLE_NAME": "DLV_ORD_ITEM_LN",
+      "TABLE_TYPE": "BASE TABLE",
+      "IS_ICEBERG": "YES",
+      "ROW_COUNT": 277146,
+      "BYTES": 817664,
+      "CLUSTERING_KEY": null
+    },
+    {
+      "TABLE_SCHEMA": "OPS_RAW",
+      "TABLE_NAME": "DSP_REFUND_FCT",
+      "TABLE_TYPE": "BASE TABLE",
+      "IS_ICEBERG": "NO",
+      "ROW_COUNT": 6243,
+      "BYTES": 151552,
+      "CLUSTERING_KEY": "LINEAR(TO_DATE(DSP_TS), DSP_RSN_CD)"
+    },
+    {
+      "TABLE_SCHEMA": "OPS_RAW",
+      "TABLE_NAME": "GEO_ZONE_LKP",
+      "TABLE_TYPE": "BASE TABLE",
+      "IS_ICEBERG": "NO",
+      "ROW_COUNT": 36,
+      "BYTES": 1536,
+      "CLUSTERING_KEY": null
+    },
+    {
+      "TABLE_SCHEMA": "OPS_RAW",
+      "TABLE_NAME": "MRC_COMM_SCD2",
+      "TABLE_TYPE": "BASE TABLE",
+      "IS_ICEBERG": "NO",
+      "ROW_COUNT": 1100,
+      "BYTES": 5120,
+      "CLUSTERING_KEY": null
+    },
+    {
+      "TABLE_SCHEMA": "OPS_RAW",
+      "TABLE_NAME": "MRC_PARTNER_MSTR",
+      "TABLE_TYPE": "BASE TABLE",
+      "IS_ICEBERG": "NO",
+      "ROW_COUNT": 400,
+      "BYTES": 7680,
+      "CLUSTERING_KEY": "LINEAR(ZONE_ID, VERT_CD)"
+    },
+    {
+      "TABLE_SCHEMA": "OPS_RAW",
+      "TABLE_NAME": "MRC_PAYOUT_LEDGER",
+      "TABLE_TYPE": "BASE TABLE",
+      "IS_ICEBERG": "YES",
+      "ROW_COUNT": 13746,
+      "BYTES": 128000,
+      "CLUSTERING_KEY": null
+    },
+    {
+      "TABLE_SCHEMA": "OPS_RAW",
+      "TABLE_NAME": "SYS_CAL_DIM",
+      "TABLE_TYPE": "BASE TABLE",
+      "IS_ICEBERG": "NO",
+      "ROW_COUNT": 1096,
+      "BYTES": 6144,
+      "CLUSTERING_KEY": null
+    },
+    {
+      "TABLE_SCHEMA": "OPS_RAW",
+      "TABLE_NAME": "ZNE_FLEET_SNAP",
+      "TABLE_TYPE": "BASE TABLE",
+      "IS_ICEBERG": "YES",
+      "ROW_COUNT": 60372,
+      "BYTES": 384000,
+      "CLUSTERING_KEY": null
+    }
+  ],
+  "snowflake_task_dag": [
+    {
+      "name": "TSK_00_ROOT_CDC_ROUTER",
+      "state": "suspended",
+      "schedule": "USING CRON 0/15 * * * * UTC",
+      "predecessors": "[]",
+      "warehouse": "QB_TRANSFORM_WH"
+    },
+    {
+      "name": "TSK_01A_STAGE_ORDERS",
+      "state": "started",
+      "schedule": null,
+      "predecessors": "[\n  \"QUICKBITE_PROD.MART.TSK_00_ROOT_CDC_ROUTER\"\n]",
+      "warehouse": "QB_TRANSFORM_WH"
+    },
+    {
+      "name": "TSK_01B_PARSE_PINGS",
+      "state": "started",
+      "schedule": null,
+      "predecessors": "[\n  \"QUICKBITE_PROD.MART.TSK_00_ROOT_CDC_ROUTER\"\n]",
+      "warehouse": "QB_TRANSFORM_WH"
+    },
+    {
+      "name": "TSK_01C_STAGE_DISPUTES",
+      "state": "started",
+      "schedule": null,
+      "predecessors": "[\n  \"QUICKBITE_PROD.MART.TSK_00_ROOT_CDC_ROUTER\"\n]",
+      "warehouse": "QB_TRANSFORM_WH"
+    },
+    {
+      "name": "TSK_02A_MART_NET_REVENUE",
+      "state": "started",
+      "schedule": null,
+      "predecessors": "[\n  \"QUICKBITE_PROD.MART.TSK_01A_STAGE_ORDERS\",\n  \"QUICKBITE_PROD.MART.TSK_01C_STAGE_DISPUTES\"\n]",
+      "warehouse": "QB_TRANSFORM_WH"
+    },
+    {
+      "name": "TSK_02B_MART_PRIME_PARTNERS",
+      "state": "started",
+      "schedule": null,
+      "predecessors": "[\n  \"QUICKBITE_PROD.MART.TSK_01A_STAGE_ORDERS\",\n  \"QUICKBITE_PROD.MART.TSK_01B_PARSE_PINGS\",\n  \"QUICKBITE_PROD.MART.TSK_01C_STAGE_DISPUTES\"\n]",
+      "warehouse": "QB_TRANSFORM_WH"
+    },
+    {
+      "name": "TSK_03_REFRESH_PBI_AND_AUDIT",
+      "state": "started",
+      "schedule": null,
+      "predecessors": "[\n  \"QUICKBITE_PROD.MART.TSK_02A_MART_NET_REVENUE\",\n  \"QUICKBITE_PROD.MART.TSK_02B_MART_PRIME_PARTNERS\"\n]",
+      "warehouse": "QB_TRANSFORM_WH"
+    }
+  ],
+  "streams": [
+    "STRM_DLV_ORD_HDR",
+    "STRM_DSP_REFUND_FCT"
+  ],
+  "masking_policies": [
+    "MSK_EMAIL_POLICY",
+    "MSK_PHONE_POLICY"
+  ],
+  "row_access_policies": [
+    "RAP_REGIONAL_ZONE_ACCESS"
+  ]
+}
