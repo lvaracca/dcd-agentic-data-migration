@@ -70,49 +70,45 @@ flowchart LR
 
 ---
 
-### 1.3 Descriptif des 5 Séquences du Recording (Pour aligner les Slides & la Voix-Off)
+### 1.3 Storyboard des 5 Clips Muets (~4 min au total — 1 Clip par Slide)
 
-| Séquence | Titre Slide / Chapitre | Durée cible vidéo | Ce qu'on voit à l'écran | Ce que ça prouve |
+> **Format recommandé pour le pitch de jeudi** : **5 clips muets courts (`30 s` à `60 s` max)** insérés chacun sur sa propre slide (zéro temps d'attente/spinner, pause nette de 3 secondes sur chaque preuve visuelle). Le présentateur commente en live à son rythme puis clique pour passer au clip suivant.
+
+| Clip / Slide | Titre Slide | Durée max | Plans visuels exacts (vidéo muette) | Verbatim clé à dire en live (2 phrases) |
 | :--- | :--- | :-: | :--- | :--- |
-| **Acte 1** | **État des lieux & Audit IA** | ~45 s | Snowsight (`QUICKBITE_PROD`, 4 Iceberg + 8 FDN, 7 Tasks), Airbyte connecté à Snowflake, puis génération du rapport d'audit par Antigravity. | Antigravity cartographie automatiquement toute la chaîne (Airbyte -> Snowflake -> Power BI), pas seulement du SQL isolé. |
-| **Acte 2** | **Migration Hybride & Bascule Airbyte** | ~1 min 30 | Montage Zero-Copy BigLake (4 tables Iceberg en < 5 s) + migration 8 tables FDN/JSON (`624 924` lignes) + bascule Airbyte -> BigQuery + **+50 commandes live** qui arrivent dans BigQuery. | Zéro recopie inutile sur Iceberg et bascule d'ingestion sans perte de données ni coupure. |
-| **Acte 3** | **Task Graph -> Dataform, Spark & BQ AI** | ~2 min | Comparaison visuelle Snowsight Task Graph vs **Dataform Compiled Graph**, exécution du DAG, parité **`$153,150.49 == $153,150.49`**, puis PySpark & `AI.FORECAST` (TimesFM zero-shot). | Remplacement moderne et testé de l'orchestrateur Snowflake avec preuve mathématique au centime. |
-| **Acte 4** | **Sacralisation des KPIs (OKF -> Knowledge Catalog)** | ~1 min 30 | Extraction de la logique SQL + Python + DAX Power BI vers `OKF v0.2`, enrichissement des schémas BigQuery + onglet **Insights** (Usage-Based Joins) + Glossary/Context Set. | Les règles métier ne sont plus cachées dans du code : elles deviennent gouvernées et réutilisables par tous. |
-| **Acte 5** | **Power BI Rebranché & Conversational Analytics** | ~1 min 30 | Diff `.tmdl` (`Snowflake.Databases` -> `GoogleBigQuery.Database`), validation 0 mesure DAX cassée, puis 2 questions complexes posées en langage naturel dans **Conversational Analytics**. | Continuité BI immédiate + IA analytique qui répond juste (évite le piège SCD2 `+$127k` et le Snapshot Trap Londres `95` vs `76 734`). |
+| **Clip 1** | **Existant & Audit IA** | `30 s` | Snowsight (*Task Graph* 7 nœuds) -> Airbyte UI (`Snowflake` actif en vert) -> scroll rapide sur `MIGRATION_AUDIT_REPORT.md`. | *« Une migration Snowflake ne se résume jamais à déplacer des tables : tout un écosystème vit autour, d'Airbyte jusqu'à Power BI. Antigravity audite automatiquement toute la chaîne avant de toucher à la production. »* |
+| **Clip 2** | **Données Hybrides & Bascule Airbyte** | `45 s` | BigQuery `quickbite_raw_ops` (`*_ICEBERG_EXT` *Zero-Copy* + `APP_DELIVERY_PINGS` en `JSON` natif) -> Airbyte UI (`BigQuery` actif, ADC sans clé) -> requête `SELECT COUNT(*) FROM CDC_dlv_ord_hdr` (`51` commandes live). | *« Les tables Apache Iceberg sur GCS sont montées en Zero-Copy grâce à BigLake, sans recopie réseau. En parallèle, Airbyte bascule à chaud sur BigQuery sans perdre une seule commande live. »* |
+| **Clip 3** | **7 Tasks -> Dataform, Parité & BQ AI** | `60 s` | **Dataform Compiled Graph** (`quickbite-lakehouse-dag`, 11 assertions vertes) -> terminal `verify_migration_parity.py` (pause 3 s sur **`\$153,150.49 == \$153,150.49`**) -> aperçu `FCT_REGIONAL_ORDER_FORECAST_14D` (**TimesFM 2.5**) & `BQ_AI_DISPUTE_TRIAGE`. | *« L'orchestrateur Snowflake est transformé en un DAG Dataform versionné avec tests de qualité intégrés et parité prouvée au centime près. On modernise au passage Snowpark et Cortex vers Spark et BigQuery AI (Gemini & TimesFM) directement en SQL. »* |
+| **Clip 4** | **Sacraliser les KPIs (GitHub & Knowledge Catalog)** | `45 s` | Dossier `bundle/` sur **GitHub (`dcd-agentic-data-migration`)** -> BigQuery Studio **Schema** de `FCT_PLATFORM_NET_REVENUE` (colonnes enrichies) + onglet **Insights** / Context Set Knowledge Catalog. | *« Une migration, c'est aussi en profiter pour formaliser et centraliser les KPIs métier une fois pour toutes. Antigravity extrait les règles cachées du SQL, de Python et du DAX vers GitHub et Knowledge Catalog. »* |
+| **Clip 5** | **Power BI Intact & Conversational Analytics** | `60 s` | Diff `.tmdl` (`Snowflake.Databases` -> `GoogleBigQuery.Database`) + sortie verte `validate_tmdl_cutover.py` -> 2 questions/réponses dans **Conversational Analytics** (pause 3 s sur **`\$153 150,49`** et Top 3 zones **`5.50 / 4.50 / 3.25`**). | *« Côté Power BI, on débranche Snowflake et on branche BigQuery sans casser une seule mesure DAX ni un seul visuel. Et grâce aux KPIs sacralisés, l'IA conversationnelle répond exactement le même chiffre au centime, en déjouant tous les pièges analytiques. »* |
 
 ---
 
 ## PARTIE 2 — Pilotage Technique jusqu'à Jeudi (Fait vs. Reste à Faire)
 
-### 2.1 Ce qui est DÉJÀ fait et vérifié en live
+### 2.1 Ce qui est DÉJÀ fait et vérifié en live (Dry Run 100 % validé ✅)
 
 | Composant | Statut | Détail vérifié |
 | :--- | :---: | :--- |
 | **Données synthétiques déterministes** | ✅ Fait | `624 924` lignes (`seed = 42`) + `ground_truth_manifest.json` avec les 5 pièges analytiques. |
 | **Snowflake Enterprise Trial (`QUICKBITE_PROD`)** | ✅ Fait | 4 tables Iceberg sur GCS + 8 FDN/`VARIANT`, 7-Node Task DAG + Dynamic Table + Stored Proc + Snowpark + ML.FORECAST + Masking/RLS + `QUERY_HISTORY`. Warehouses suspendus (`AUTO_SUSPEND = 60`). |
-| **Prérequis GCP (`dcd-migration-demo`, `us-central1`)** | ✅ Fait | Bucket `gs://dcd-migration-demo-quickbite-lakehouse`, connexion BigLake `biglake-iceberg-conn`, datasets `quickbite_raw_ops`, `quickbite_raw_iot`, `quickbite_gold_mart` (vides, prêts pour Acte 2). |
-| **Airbyte OSS + PostgreSQL OLTP (VM privée GCE)** | ✅ Fait | `quickbite-airbyte-vm` (`10.10.0.2`, `RUNNING`) : connexion `QuickBite OLTP -> Snowflake (Legacy)` testée (`job 2 succeeded`), destination BigQuery ADC (keyless) pré-testée et image Docker en cache. |
-| **Projet Power BI (`.pbip` / `.tmdl`)** | ✅ Fait | Modèle sémantique complet avec 3 tables Gold et **11 mesures DAX** pointant actuellement sur Snowflake. |
-| **6 Skills Antigravity + Scripts de migration/eval** | ✅ Fait | `.agents/skills/*`, `evals/verify_migration_parity.py`, `airbyte_cutover_controller.py`, `simulate_live_orders.py`, `open_airbyte_ui_tunnel.sh`. |
+| **Acte 1 — Audit Live** | ✅ Validé | `inspect_snowflake_estate.py` exécuté (`11 s`) -> `gcp-target/MIGRATION_AUDIT_REPORT.md`. |
+| **Acte 2 — Données Hybrides & Airbyte Live** | ✅ Validé | 4 Iceberg Zero-Copy BigLake + 8 FDN/`JSON` natif + RLS `GEO_ZONE_LKP` + bascule Airbyte (`quickbite-airbyte-vm`) vers BigQuery (ADC keyless) + 51 lignes synchronisées dans `CDC_dlv_ord_hdr`. |
+| **Acte 3 — Dataform, Spark & BigQuery AI** | ✅ Validé | Repo Dataform live `quickbite-lakehouse-dag` (`dev-antigravity`, 32 actions, 11 assertions `SUCCEEDED`), **parité 100 % au centime** (`\$153 150,49 == \$153 150,49`), PySpark vectorisé, `AI.CLASSIFY`/`AI.SCORE` et `TimesFM 2.5` exécutés en live. |
+| **Acte 4 — OKF v0.2 & Métadonnées BigQuery** | ✅ Validé | `bundle/` & `okf/` générés, 11 tables / 63 colonnes documentées dans BigQuery + `QUERY_HISTORY` alimenté. |
+| **Acte 5 — Power BI (`.pbip` / `.tmdl`)** | ✅ Validé | 3 tables Gold rebranchées sur `GoogleBigQuery.Database([UseStorageApi=true])` -> `validate_tmdl_cutover.py` **PASSED (0 mesure DAX cassée)**. |
+| **Dépôt GitHub + Script de Reset** | ✅ Fait | Dépôt privé poussé : https://github.com/lvaracca/dcd-agentic-data-migration + `scripts/reset_demo_to_before.sh`. |
 
 ---
 
-### 2.2 Ce qu'il RESTE à faire avant le recording de jeudi
+### 2.2 Ce qu'il RESTE à faire avant jeudi
 
-1. **Répétition complète (Dry Run Actes 1 à 5)** *(Priorité #1 — à faire aujourd'hui/mercredi)* :
-   - Les datasets BigQuery cibles sont encore vierges (`gcp-target/`, `okf/`, `bundle/` n'ont pas encore été générés).
-   - Il faut exécuter une **passe complète Actes 1 -> 5** pour valider sur le terrain :
-     - **Acte 2** : `migrate_hybrid_tables_to_bq.py` + bascule Airbyte (`cutover-to-bigquery` + `simulate_live_orders.py` + `trigger-sync`).
-     - **Acte 3** : déploiement & compilation du DAG **Dataform** dans **BigQuery Studio** (vérifier les droits IAM du Service Account Dataform sur `dcd-migration-demo`), parité `verify_migration_parity.py`, script **Managed Spark**, et exécution réelle de **BigQuery AI** (`AI.CLASSIFY`, `AI.SCORE`, `AI.FORECAST` TimesFM — vérifier si une connexion Vertex AI / Cloud Resource est requise pour `AI.CLASSIFY`/`AI.SCORE`).
-     - **Acte 4** : génération `okf/` & `bundle/`, enrichissement des métadonnées BigQuery + `QUERY_HISTORY`, et publication du **Context Set** dans **Knowledge Catalog** (vérifier l'affichage dans BigQuery Studio -> onglet **Insights**).
-     - **Acte 5** : rebranchement Power BI `.tmdl` + validation `validate_tmdl_cutover.py` + test réel des prompts dans **BigQuery Conversational Analytics**.
-2. **Script de reset propre (`scripts/reset_demo_to_before.sh`)** *(optionnel mais recommandé)* :
-   - Permet de remettre BigQuery, Airbyte (`Legacy Snowflake` actif), `bi-powerbi/` (`git checkout`) et `gcp-target/` à leur état initial en 30 secondes si vous voulez refaire une prise propre pour le recording.
-3. **Trancher l'affichage Power BI dans le recording** :
-   - **Option rapide (recommandée pour vidéo)** : montrer le code `.tmdl` + `git diff` + sortie verte de `validate_tmdl_cutover.py` (zéro friction macOS).
-   - **Option visuelle complète** : connecter le repo Git à **Power BI Service / Fabric** dans Chrome pour filmer le clic **Refresh** sur le rapport après l'Acte 5.
-4. **Tourner et monter le recording (~6 à 8 min)** :
-   - Enregistrer par petits clips (1 clip par Acte) en coupant les attentes de chargement, puis transmettre la vidéo + la Partie 1 à Johan.
+1. **Publier le Context Set dans Knowledge Catalog** *(optionnel / bonus visuel pour le Clip 4)* :
+   - Installer une version officiellement signée de Node.js LTS sur Mac (ou passer par **Google Cloud Shell**) puis `@google-cloud/kcmd`, convertir `bundle/` au format recommandé et publier le Context Set dans `dcd-migration-demo` (`us-central1`).
+2. **Tourner les 5 clips muets (`30–60 s`, `1920×1080`, zoom Chrome `125 %`, terminal `18 pt`)** :
+   - Les Clips 2, 3, 4 et 5 peuvent être filmés **dès maintenant** (tout est déjà déployé et chaud dans BigQuery Studio / Dataform / Airbyte).
+   - Utiliser `scripts/reset_demo_to_before.sh` uniquement si vous souhaitez filmer l'état « BigQuery vide / Airbyte connecté à Snowflake » pour le début du Clip 1.
+3. **Transmettre à Johan** : la **Partie 1** de ce document (message clé + diagramme Mermaid + storyboard des 5 clips) + les 5 fichiers vidéo `.mp4`.
 
 ---
 
