@@ -8,16 +8,16 @@
 
 ### 1.1 Ce que la démo prouve (Version ultra-concise pour les slides)
 
-**Thèse centrale** : *Migrer de Snowflake vers Google Cloud avec **Antigravity** ne se limite pas à copier des tables — on remplace tout le cœur analytique **sans disruption** (de l'ingestion Airbyte jusqu'à Power BI) tout en **sacralisant les KPIs métier** pour l'IA.*
+**Thèse centrale** : *Migrer de Snowflake vers Google Cloud avec **Antigravity** ne se limite pas à copier des tables — on remplace tout le cœur analytique **sans disruption** (de l'ingestion Airbyte jusqu'à **Tableau Cloud**) tout en **sacralisant les KPIs métier** pour l'IA.*
 
 - **1. Zéro disruption de bout en bout** :
   - **En amont** : Airbyte bascule de Snowflake vers BigQuery en gardant ses curseurs incrémentaux — aucune commande live perdue.
   - **Sur les données** : les tables **Apache Iceberg** sur GCS sont montées en **Zero-Copy** dans BigQuery (**BigLake**) en quelques secondes.
-  - **En aval** : **Power BI** (`.pbip / .tmdl`) est rebranché de Snowflake vers BigQuery sans casser une seule mesure DAX ni un seul visuel.
+  - **En aval** : **Tableau Cloud** est rebranché en direct de Snowflake vers BigQuery (*Replace Data Source*) sans casser un seul *Calculated Field* ni un seul graphique (et le même contrat de schéma s'applique à Power BI).
 - **2. Modernisation complète Orchestration, Spark & IA** :
   - Un DAG complexe de **7 Snowflake Tasks** + Dynamic Table + Stored Proc est converti automatiquement en **Dataform** (Git + tests intégrés), Snowpark en **Managed Spark**, et Cortex en **BigQuery AI** (`AI.CLASSIFY`, `AI.FORECAST` TimesFM).
 - **3. Sacralisation des KPIs & Parité au centime (Knowledge-as-Code)** :
-  - Toute la logique métier cachée (SQL Snowflake, Snowpark Python, mesures DAX Power BI) est extraite vers **Open Knowledge Format (OKF)** et **Google Cloud Knowledge Catalog**.
+  - Toute la logique métier cachée (SQL Snowflake, Snowpark Python, règles BI) est extraite vers **GitHub / Open Knowledge Format (OKF)** et **Google Cloud Knowledge Catalog**.
   - **Preuve chiffrée** : parité mathématique exacte au centime (**\$153 150,49** de Net Revenue Q3 Restaurants), et **BigQuery Conversational Analytics** déjoue automatiquement les 5 pièges analytiques (SCD2 commissions, fan-out remboursements, snapshot trap flotte, jointure chargeback cachée, bug GPS JSON).
 
 ---
@@ -51,14 +51,14 @@ flowchart LR
     end
 
     subgraph DOWN["2. Consommation Aval (BI & IA)"]
-        PBI["Power BI Executive Cockpit<br/>(.pbip / TMDL • 11 Mesures DAX)"]
+        BI["Tableau Cloud Executive Cockpit<br/>(Replace Data Source • 0 KPI cassé)"]
         CA["BigQuery Conversational Analytics<br/>(Q&A Métier Fiabilisé)"]
     end
 
     AB -. "Avant : Snowflake" .-> SF_RAW
     AB == "Bascule Live : BigQuery (ADC)" ==> BQ_RAW
-    SF_MART -. "Avant : Snowflake.Databases()" .-> PBI
-    BQ_MART == "Rebranchement : GoogleBigQuery.Database()" ==> PBI
+    SF_MART -. "Avant : Connecteur Snowflake" .-> BI
+    BQ_MART == "Rebranchement : Connecteur BigQuery" ==> BI
     KC & BQ_MART ==> CA
 
     style LEGACY fill:#fce8e6,stroke:#c5221f,stroke-dasharray: 5 5
@@ -80,7 +80,7 @@ flowchart LR
 | **Clip 2** | **Données Hybrides & Bascule Airbyte** | `45 s` | BigQuery `quickbite_raw_ops` (`*_ICEBERG_EXT` *Zero-Copy* + `APP_DELIVERY_PINGS` en `JSON` natif) -> Airbyte UI (`BigQuery` actif, ADC sans clé) -> requête `SELECT COUNT(*) FROM CDC_dlv_ord_hdr` (`51` commandes live). | *« Les tables Apache Iceberg sur GCS sont montées en Zero-Copy grâce à BigLake, sans recopie réseau. En parallèle, Airbyte bascule à chaud sur BigQuery sans perdre une seule commande live. »* |
 | **Clip 3** | **7 Tasks -> Dataform, Parité & BQ AI** | `60 s` | **Dataform Compiled Graph** (`quickbite-lakehouse-dag`, 11 assertions vertes) -> terminal `verify_migration_parity.py` (pause 3 s sur **`\$153,150.49 == \$153,150.49`**) -> aperçu `FCT_REGIONAL_ORDER_FORECAST_14D` (**TimesFM 2.5**) & `BQ_AI_DISPUTE_TRIAGE`. | *« L'orchestrateur Snowflake est transformé en un DAG Dataform versionné avec tests de qualité intégrés et parité prouvée au centime près. On modernise au passage Snowpark et Cortex vers Spark et BigQuery AI (Gemini & TimesFM) directement en SQL. »* |
 | **Clip 4** | **Sacraliser les KPIs (GitHub & Knowledge Catalog)** | `45 s` | Dossier `bundle/` sur **GitHub (`dcd-agentic-data-migration`)** -> BigQuery Studio **Schema** de `FCT_PLATFORM_NET_REVENUE` (colonnes enrichies) + onglet **Insights** / Context Set Knowledge Catalog. | *« Une migration, c'est aussi en profiter pour formaliser et centraliser les KPIs métier une fois pour toutes. Antigravity extrait les règles cachées du SQL, de Python et du DAX vers GitHub et Knowledge Catalog. »* |
-| **Clip 5** | **Power BI Intact & Conversational Analytics** | `60 s` | Diff `.tmdl` (`Snowflake.Databases` -> `GoogleBigQuery.Database`) + sortie verte `validate_tmdl_cutover.py` -> 2 questions/réponses dans **Conversational Analytics** (pause 3 s sur **`\$153 150,49`** et Top 3 zones **`5.50 / 4.50 / 3.25`**). | *« Côté Power BI, on débranche Snowflake et on branche BigQuery sans casser une seule mesure DAX ni un seul visuel. Et grâce aux KPIs sacralisés, l'IA conversationnelle répond exactement le même chiffre au centime, en déjouant tous les pièges analytiques. »* |
+| **Clip 5** | **Tableau Cloud Intact & Conversational Analytics** | `60 s` | **Tableau Cloud** connecté à Snowflake (`\$153,150.49`) -> **Replace Data Source -> BigQuery** (0 KPI cassé, chiffres identiques) -> 2 questions/réponses dans **Conversational Analytics** (pause 3 s sur **`\$153 150,49`** et Top 3 zones **`5.50 / 4.50 / 3.25`**). | *« Côté Tableau Cloud, on débranche Snowflake et on branche BigQuery en 3 clics sans casser un seul KPI ni un seul graphique. Et grâce aux KPIs sacralisés, l'IA conversationnelle répond exactement le même chiffre au centime, en déjouant tous les pièges analytiques. »* |
 
 ---
 
