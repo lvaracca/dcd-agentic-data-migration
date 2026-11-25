@@ -43,6 +43,18 @@ variable "gcp_project_id" {
   default = ""
 }
 
+variable "gcp_region" {
+  type        = string
+  default     = "us-central1"
+  description = "BigQuery dataset location and GCP region"
+}
+
+variable "bq_raw_dataset" {
+  type        = string
+  default     = "urbanfork_raw_ops"
+  description = "Target BigQuery raw dataset for Airbyte incremental sync"
+}
+
 variable "gcs_lakehouse_bucket" {
   type    = string
   default = ""

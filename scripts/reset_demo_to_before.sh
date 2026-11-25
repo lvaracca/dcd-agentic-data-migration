@@ -87,6 +87,6 @@ PY
 
 echo "=== 4/4 Cleaning local generated target folders (keeping scripts & docs) ==="
 rm -rf gcp-target/MIGRATION_AUDIT_REPORT.md okf bundle
-echo "Note: To revert bi-powerbi/*.tmdl and ingestion-airbyte/airbyte_terraform/main.tf back to Snowflake, run:"
-echo "  git checkout -- bi-powerbi/ ingestion-airbyte/airbyte_terraform/main.tf"
+echo "Note: To revert bi-tableau/*.twb and ingestion-airbyte/airbyte_terraform/main.tf back to Snowflake, run:"
+echo "  git checkout -- bi-tableau/ ingestion-airbyte/airbyte_terraform/main.tf"
 echo "✅ Environment reset to clean BEFORE-migration state!"

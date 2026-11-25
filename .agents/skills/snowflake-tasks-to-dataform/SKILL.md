@@ -12,9 +12,9 @@ description: >-
 
 Load `@skill:dataform-bigquery` alongside this skill for Dataform CLI best practices.
 
-## Critical Schema Contract Rule (For Seamless Power BI Cutover!)
-Power BI's Power Query (`M`) engine is **case-sensitive** on table and column names!
-When generating the Dataform Gold Marts in `urbanfork_gold_mart`, preserve **EXACT UPPERCASE** table names (`name: "FCT_PLATFORM_NET_REVENUE"`, `name: "DIM_PRIME_PARTNER_SCORECARD"`, `name: "DT_LIVE_ZONE_SUPPLY_DEFICIT"`, `name: "RPT_PBI_EXECUTIVE_SUMMARY"`) and **UPPERCASE column aliases** matching `snowflake-source/03_streams_tasks_dynamic_tables.sql` so Power BI re-points with zero broken visuals.
+## Critical Schema Contract Rule (For Seamless Tableau Cutover!)
+Tableau's workbook XML column bindings are **case-sensitive** on table and column names!
+When generating the Dataform Gold Marts in `urbanfork_gold_mart`, preserve **EXACT UPPERCASE** table names (`name: "FCT_PLATFORM_NET_REVENUE"`, `name: "DIM_PRIME_PARTNER_SCORECARD"`, `name: "DT_LIVE_ZONE_SUPPLY_DEFICIT"`, `name: "RPT_PBI_EXECUTIVE_SUMMARY"`) and **UPPERCASE column aliases** matching `snowflake-source/03_streams_tasks_dynamic_tables.sql` so Tableau Cloud re-points with zero broken visuals.
 
 ## Step-by-Step Translation Mapping (`gcp-target/dataform/`)
 

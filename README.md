@@ -4,8 +4,8 @@ Live, zero-downtime migration demo orchestrated by **Antigravity** across the fu
 1. **Upstream Ingestion (`ingestion-airbyte/`)**: PostgreSQL OLTP -> **Airbyte** incremental sync seamlessly re-pointed from `destination-snowflake` to `destination-bigquery` without losing live orders.
 2. **Hybrid Storage (`snowflake-source/`)**: **4 Snowflake-Managed Apache Iceberg tables on GCS** (mounted Zero-Copy in BigQuery via **BigLake**) + **8 Native Snowflake FDN / `VARIANT` tables** (migrated to Partitioned/Clustered BigQuery + Native `JSON` + Policy Tags & RLS).
 3. **Orchestration & Compute**: **7-Node Snowflake Task DAG** (`AFTER` fan-out/fan-in + `STREAMS` + `DYNAMIC TABLE` + Scripting Stored Proc), **Snowpark Python**, and **Cortex AI/ML** -> migrated to **Dataform (`.sqlx` DAG + assertions)**, **Managed Spark (Dataproc Serverless)**, and **BigQuery AI (TimesFM & Gemini)**.
-4. **Business Logic Rescue (`OKF v0.2` -> `Knowledge Catalog`)**: Reverse-engineering undocumented KPIs, status codes, and join traps out of **Snowflake SQL, Snowpark Python, and Power BI DAX (`.tmdl`)** into **BigQuery Metadata**, **Knowledge Catalog (Business Glossary + Context Set + Usage-Based Data Insights)**, and **BigQuery Conversational Analytics**.
-5. **Downstream BI Cutover (`bi-powerbi/`)**: Unplugging **Power BI (`UrbanFork_Executive_Cockpit.pbip` / TMDL)** from `Snowflake.Databases(...)` and plugging it straight into `GoogleBigQuery.Database(...)` with zero broken visuals.
+4. **Business Logic Rescue (`OKF v0.2` -> `Knowledge Catalog`)**: Reverse-engineering undocumented KPIs, status codes, and join traps out of **Snowflake SQL, Snowpark Python, and Tableau Calculated Fields (`.twb`)** into **BigQuery Metadata**, **Knowledge Catalog (Business Glossary + Context Set + Usage-Based Data Insights)**, and **BigQuery Conversational Analytics**.
+5. **Downstream BI Cutover (`bi-tableau/`)**: Re-pointing **Tableau Cloud (`UrbanFork_Executive_Cockpit_Snowflake.twb`)** from Snowflake to Google BigQuery (`Google OAuth`) with zero broken visuals.
 
 See [SPECIFICATION.md](SPECIFICATION.md) for the full 45-minute run-of-show and architecture diagrams.
 
@@ -40,7 +40,7 @@ Synthetic data files are already generated in `data-generator/output/` (re-run `
 ./scripts/01_setup_gcp_prereqs.sh --grant-snowflake-sa <SNOWFLAKE_GCP_SA_EMAIL>
 
 # Step 2: Create 4 Iceberg + 8 FDN tables, load 624,924 rows, execute the 7-Node Task DAG
-#         to populate Gold tables for Power BI, seed QUERY_HISTORY, and suspend Warehouses
+#         to populate Gold tables for Tableau Cloud, seed QUERY_HISTORY, and suspend Warehouses
 .venv/bin/python data-generator/seed_snowflake_instance.py --step 2
 ```
 

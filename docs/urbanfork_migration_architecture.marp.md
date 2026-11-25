@@ -167,7 +167,7 @@ style: |
 <br>
 
 - **Scénario** : Plateforme de livraison repas & courses à la demande (*UrbanFork*)
-- **Périmètre Live** : `Airbyte -> Snowflake (Iceberg + FDN + Tasks) -> Power BI` basculé vers `BigLake + BigQuery + Dataform + Spark + BQ AI + Knowledge Catalog`
+- **Périmètre Live** : `Airbyte -> Snowflake (Iceberg + FDN + Tasks) -> Tableau Cloud` basculé vers `BigLake + BigQuery + Dataform + Spark + BQ AI + Knowledge Catalog`
 - **Format de la démonstration** : 45 minutes, 100 % exécuté en direct sur GCP (`us-central1`)
 
 ---
@@ -182,17 +182,17 @@ Une migration d'entrepôt de données ne se résume jamais à déplacer des tabl
 ### Impératif A — Remplacer sans disruption
 - **En amont (Ingestion)** : basculer **Airbyte** de Snowflake vers BigQuery en conservant les curseurs incrémentaux (`updated_at`), sans perdre une seule commande live.
 - **Au centre (Stockage & DAG)** : monter les tables **Apache Iceberg** en *Zero-Copy* (**BigLake**), migrer les 7 **Snowflake Tasks** vers **Dataform**, et moderniser Snowpark & Cortex vers **Managed Spark** & **BigQuery AI**.
-- **En aval (BI)** : rebrancher **Power BI** (`.pbip` / `.tmdl`) sur BigQuery sans casser une seule mesure DAX ni un seul graphique.
+- **En aval (BI)** : rebrancher **Tableau Cloud** (`.pbip` / `.tmdl`) sur BigQuery sans casser une seule Calculated Field ni un seul graphique.
 
 </div>
 <div class="card-green">
 
 ### Impératif B — Sacraliser les KPIs métier
-- **Sortir du "tribal knowledge"** : aujourd'hui, les règles de calcul sont éparpillées entre vues SQL, scripts Python, YAML et formules DAX Power BI.
+- **Sortir du "tribal knowledge"** : aujourd'hui, les règles de calcul sont éparpillées entre vues SQL, scripts Python, YAML et Calculated Fields Tableau Cloud.
 - **Knowledge-as-Code (`OKF v0.2`)** : rétro-ingénierie automatisée de toutes les formules, codes statuts et pièges de jointure vers **Google Cloud Knowledge Catalog**.
 - **Vérité unique & vérifiable** :
   - Parité **au centime près** entre Snowflake et BigQuery (`verify_migration_parity.py`).
-  - Même chiffre dans **Power BI** et **BigQuery Conversational Analytics**.
+  - Même chiffre dans **Tableau Cloud** et **BigQuery Conversational Analytics**.
 
 </div>
 </div>
@@ -262,7 +262,7 @@ Une migration d'entrepôt de données ne se résume jamais à déplacer des tabl
 
   <rect x="292" y="375" width="528" height="64" rx="8" fill="#fef7e0" stroke="#f29900" stroke-width="1.5"/>
   <text x="556" y="399" text-anchor="middle" font-size="13" font-weight="700" fill="#b06000">Knowledge Catalog &amp; Open Knowledge Format (OKF v0.2)</text>
-  <text x="556" y="421" text-anchor="middle" font-size="11.5" fill="#3c4043">Règles extraites de SQL + Python + DAX • Glossary • Context Set • Usage-Based Joins (QUERY_HISTORY)</text>
+  <text x="556" y="421" text-anchor="middle" font-size="11.5" fill="#3c4043">Règles extraites de SQL + Python + Tableau • Glossary • Context Set • Usage-Based Joins (QUERY_HISTORY)</text>
 
   <line x1="457" y1="305" x2="473" y2="305" stroke="#137333" stroke-width="2"/>
   <line x1="653" y1="305" x2="669" y2="305" stroke="#137333" stroke-width="2"/>
@@ -271,8 +271,8 @@ Une migration d'entrepôt de données ne se résume jamais à déplacer des tabl
   <rect x="890" y="95" width="220" height="295" rx="12" fill="#f8f9fa" stroke="#5f6368" stroke-width="1.5"/>
   <text x="1000" y="122" text-anchor="middle" font-size="14" font-weight="700" fill="#202124">AVAL (BI &amp; IA Métier)</text>
   <rect x="906" y="145" width="188" height="96" rx="8" fill="#ffffff" stroke="#f29900" stroke-width="2"/>
-  <text x="1000" y="172" text-anchor="middle" font-size="13" font-weight="700" fill="#b06000">Power BI (.pbip / TMDL)</text>
-  <text x="1000" y="193" text-anchor="middle" font-size="11" fill="#5f6368">11 mesures DAX intactes</text>
+  <text x="1000" y="172" text-anchor="middle" font-size="13" font-weight="700" fill="#b06000">Tableau Cloud (.twb)</text>
+  <text x="1000" y="193" text-anchor="middle" font-size="11" fill="#5f6368">11 Calculated Fields intactes</text>
   <text x="1000" y="211" text-anchor="middle" font-size="11" fill="#137333" font-weight="600">GoogleBigQuery.Database()</text>
   <text x="1000" y="227" text-anchor="middle" font-size="10.5" fill="#5f6368">DirectQuery Storage API</text>
 
@@ -368,7 +368,7 @@ Snowflake enferme l'orchestration dans du DDL impératif (`AFTER`, `WAREHOUSE`, 
   <!-- Tier 3 -->
   <rect x="865" y="102" width="225" height="98" rx="10" fill="#fef7e0" stroke="#f29900" stroke-width="2"/>
   <text x="977" y="128" text-anchor="middle" font-size="12" font-weight="700" fill="#b06000">TSK_03_REFRESH_PBI_AUDIT</text>
-  <text x="977" y="149" text-anchor="middle" font-size="11" fill="#202124">Synthèse Power BI +</text>
+  <text x="977" y="149" text-anchor="middle" font-size="11" fill="#202124">Synthèse Tableau Cloud +</text>
   <text x="977" y="167" text-anchor="middle" font-size="11" fill="#202124">SP_AUDIT_DISPUTE_CHARGEBACKS</text>
   <text x="977" y="187" text-anchor="middle" font-size="10.5" fill="#137333">-> rpt_pbi + operations/audit.sqlx</text>
 
@@ -411,12 +411,12 @@ Snowflake enferme l'orchestration dans du DDL impératif (`AFTER`, `WAREHOUSE`, 
 </div>
 <div class="card-yellow">
 
-### 3. Rebranchement Power BI (Aval)
+### 3. Rebranchement Tableau Cloud (Aval)
 - Projet moderne `.pbip` + `.tmdl` versionné dans Git.
 - Antigravity remplace uniquement la partition M-Query :
   `Snowflake.Databases(...)`
   -> `GoogleBigQuery.Database([UseStorageApi=true])`
-- **Contrat de schéma conservé** (noms & colonnes MAJUSCULES) -> **0 mesure DAX et 0 visuel cassé**.
+- **Contrat de schéma conservé** (noms & colonnes MAJUSCULES) -> **0 Calculated Field et 0 visuel cassé**.
 
 </div>
 </div>
@@ -425,7 +425,7 @@ Snowflake enferme l'orchestration dans du DDL impératif (`AFTER`, `WAREHOUSE`, 
 
 # 6. Sacraliser les KPIs : L'Approche "Knowledge-as-Code"
 
-> **Problème classique** : après une migration, le CFO voit un chiffre dans Power BI, l'analyste SQL en trouve un autre, et l'assistant IA hallucine en tombant dans un piège de jointure.
+> **Problème classique** : après une migration, le CFO voit un chiffre dans Tableau Cloud, l'analyste SQL en trouve un autre, et l'assistant IA hallucine en tombant dans un piège de jointure.
 
 <div class="cols-2">
 <div>
@@ -435,7 +435,7 @@ Antigravity lit **toute la codebase legacy** pour extraire chaque règle métier
 1. **Snowflake SQL** (`03_streams_tasks...`, `04_legacy_views...`) : formules SCD2, filtres de statuts, anti-fanout.
 2. **Snowpark Python** (`snowpark_merchant_fraud_scoring.py`) : seuils de risque fraude.
 3. **Cortex YAML** (`cortex_ops_model.yaml`) : synonymes & dimensions métier.
-4. **Power BI `.tmdl`** : les **11 mesures DAX** exécutives (`Effective Take-Rate %`, `Prime GMV Share %`, etc.).
+4. **Tableau Cloud `.twb`** : les **11 Calculated Fields** exécutives (`Effective Take-Rate %`, `Prime GMV Share %`, etc.).
 
 </div>
 <div class="card-green">
@@ -446,7 +446,7 @@ Antigravity lit **toute la codebase legacy** pour extraire chaque règle métier
 3. **Knowledge Catalog** :
    - **Business Glossary** & **Context Set** gouvernés.
    - **Usage-Based Data Insights** alimenté par le `QUERY_HISTORY` réel des analystes.
-4. **BigQuery Conversational Analytics** : questions ad-hoc en langage naturel **100 % alignées sur Power BI**.
+4. **BigQuery Conversational Analytics** : questions ad-hoc en langage naturel **100 % alignées sur Tableau Cloud**.
 
 </div>
 </div>
@@ -533,11 +533,11 @@ Pour démontrer la valeur réelle de **Dataform**, **OKF v0.2** et **Knowledge C
 
 | Temps | Acte | Action orchestrée par Antigravity | Preuve visible à l'écran |
 | :--- | :--- | :--- | :--- |
-| **00–05 min** | **Acte 1 : Audit Live** | Inspection complète de Snowflake (`URBANFORK_PROD`), Airbyte, 7 Tasks et Power BI `.tmdl`. | Blueprint `MIGRATION_AUDIT_REPORT.md` + Snowsight Task Graph. |
+| **00–05 min** | **Acte 1 : Audit Live** | Inspection complète de Snowflake (`URBANFORK_PROD`), Airbyte, 7 Tasks et Tableau Cloud `.twb`. | Blueprint `MIGRATION_AUDIT_REPORT.md` + Snowsight Task Graph. |
 | **05–13 min** | **Acte 2 : Données & Airbyte** | Montage **Zero-Copy BigLake** (4 Iceberg) + chargement 8 FDN/`JSON` + bascule **Airbyte -> BigQuery** + 50 commandes live. | `624 924` lignes migrées + 50 commandes du 1er avril atterrissent dans BigQuery via Airbyte UI. |
 | **13–26 min** | **Acte 3 : Dataform, Spark & AI** | Conversion du 7-Node Task Graph en **DAG Dataform** + **Managed Spark** + **BigQuery AI** (`AI.CLASSIFY`, TimesFM `AI.FORECAST`). | Graphe compilé Dataform vs Snowsight + **`153 150,49 == 153 150,49`** dans `verify_migration_parity.py`. |
-| **26–37 min** | **Acte 4 : KPIs -> OKF & KC** | Extraction des règles SQL + Python + DAX -> **OKF v0.2** -> métadonnées BigQuery, **Knowledge Catalog** & `QUERY_HISTORY`. | Schémas BigQuery documentés + onglet **Insights** (jointures d'usage) + Glossary / Context Set. |
-| **37–45 min** | **Acte 5 : Power BI & Q&A IA** | Refactoring des `.tmdl` vers `GoogleBigQuery.Database()` + questions executives dans **BigQuery Conversational Analytics**. | Power BI rafraîchi sans casse + Q&A IA évitant les 5 pièges analytiques ! |
+| **26–37 min** | **Acte 4 : KPIs -> OKF & KC** | Extraction des règles SQL + Python + Tableau -> **OKF v0.2** -> métadonnées BigQuery, **Knowledge Catalog** & `QUERY_HISTORY`. | Schémas BigQuery documentés + onglet **Insights** (jointures d'usage) + Glossary / Context Set. |
+| **37–45 min** | **Acte 5 : Tableau Cloud & Q&A IA** | Refactoring des `.tmdl` vers `GoogleBigQuery.Database()` + questions executives dans **BigQuery Conversational Analytics**. | Tableau Cloud rafraîchi sans casse + Q&A IA évitant les 5 pièges analytiques ! |
 
 ---
 
@@ -548,6 +548,6 @@ Pour démontrer la valeur réelle de **Dataform**, **OKF v0.2** et **Knowledge C
 
 <br>
 
-1. **Zéro disruption opérationnelle** : Airbyte garde ses curseurs, BigLake lit Iceberg *Zero-Copy*, Power BI garde 100 % de ses visuels.
+1. **Zéro disruption opérationnelle** : Airbyte garde ses curseurs, BigLake lit Iceberg *Zero-Copy*, Tableau Cloud garde 100 % de ses visuels.
 2. **Modernisation immédiate** : fin des Tasks impératives et warehouses à dimensionner -> **Dataform + BigQuery Serverless + BigQuery AI**.
 3. **KPIs sacralisés & gouvernés** : la connaissance métier est extraite une fois pour toutes en **OKF v0.2 / Knowledge Catalog** — garantissant un chiffre unique au centime entre BI et IA conversationnelle.

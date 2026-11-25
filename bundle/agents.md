@@ -8,7 +8,7 @@ region: us-central1
 
 # UrbanFork Data Agent Knowledge Router
 
-This Open Knowledge Format (OKF v0.2) context bundle codifies institutional UrbanFork business rules reverse-engineered from legacy Snowflake SQL Tasks/Views/Procs, Snowpark Python, Cortex Analyst YAML, and Power BI `.tmdl` DAX measures.
+This Open Knowledge Format (OKF v0.2) context bundle codifies institutional UrbanFork business rules reverse-engineered from legacy Snowflake SQL Tasks/Views/Procs, Snowpark Python, Cortex Analyst YAML, and Tableau (`.twb`) Calculated Fields.
 
 ## Routing Rules
 - For **profitability, GMV, take-rate, merchant commissions, or refunds**: read [documents/concepts/platform-net-revenue.md](documents/concepts/platform-net-revenue.md) and query `urbanfork_gold_mart.FCT_PLATFORM_NET_REVENUE`.

@@ -25,6 +25,7 @@ def repoint_twb(input_path: Path, output_path: Path, project_id: str, dataset: s
     for conn in root.iter("connection"):
         if conn.attrib.get("class") == "snowflake":
             conn.attrib["class"] = "bigquery"
+            conn.attrib["authentication"] = "oauth"
             conn.attrib["project"] = project_id
             conn.attrib["CATALOG"] = project_id
             conn.attrib["schema"] = dataset
@@ -32,6 +33,15 @@ def repoint_twb(input_path: Path, output_path: Path, project_id: str, dataset: s
             for sf_key in ("server", "warehouse", "role", "dbname", "username", "service"):
                 conn.attrib.pop(sf_key, None)
             updated += 1
+
+    for nc in root.iter("named-connection"):
+        if "snowflake" in nc.attrib.get("caption", "").lower():
+            nc.attrib["caption"] = project_id
+
+    for ds in root.iter("datasource"):
+        cap = ds.attrib.get("caption", "")
+        if "Snowflake" in cap:
+            ds.attrib["caption"] = cap.replace("Snowflake", "BigQuery")
 
     for rel in root.iter("relation"):
         tbl = rel.attrib.get("table", "")

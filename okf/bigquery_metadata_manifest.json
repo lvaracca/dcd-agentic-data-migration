@@ -4,7 +4,7 @@
     "snowflake-source/04_legacy_views_and_procs.sql",
     "snowflake-source/snowpark/snowpark_merchant_fraud_scoring.py",
     "snowflake-source/cortex-analyst/cortex_ops_model.yaml",
-    "bi-powerbi/UrbanFork_Executive_Cockpit.SemanticModel/definition/tables/*.tmdl"
+    "bi-tableau/UrbanFork_Executive_Cockpit_Snowflake.twb"
   ],
   "tables": [
     {
@@ -109,7 +109,7 @@
     {
       "dataset": "urbanfork_gold_mart",
       "table": "FCT_PLATFORM_NET_REVENUE",
-      "description": "Certified Gold daily marketplace profitability fact table (Dataform + Power BI DirectQuery). Encodes SCD2 merchant commission lookup, anti-fanout approved refund deduction, and excludes pass-through courier tips. Official Benchmarks: Q3 2025 Calendar Restaurant Net Revenue = $153,150.49; FY25 Restaurant = $937,401.38; FY25 Grocery = $38,309.66.",
+      "description": "Certified Gold daily marketplace profitability fact table (Dataform + Tableau Cloud Live). Encodes SCD2 merchant commission lookup, anti-fanout approved refund deduction, and excludes pass-through courier tips. Official Benchmarks: Q3 2025 Calendar Restaurant Net Revenue = $153,150.49; FY25 Restaurant = $937,401.38; FY25 Grocery = $38,309.66.",
       "columns": {
         "CAL_DT": "Calendar date of delivered order.",
         "FISC_YR_N": "UrbanFork Fiscal Year (starts February 1).",
@@ -119,13 +119,13 @@
         "GROSS_MERCHANDISE_VALUE_USD": "Total Gross Merchandise Value (GMV) of completed delivered orders (USD).",
         "APPROVED_REFUNDS_USD": "Total approved customer refunds (RFND_STS_FLG = 1), deduplicated at order grain.",
         "PLATFORM_NET_REVENUE_USD": "Official UrbanFork Platform Net Revenue (Net Take): Merchant SCD2 Commission + Delivery & Service Fees - Courier Pay - Promo Vouchers - Approved Refunds (excludes Courier Tips).",
-        "EFFECTIVE_TAKE_RATE_PCT": "Platform Net Revenue divided by GMV (Power BI DAX: Effective Take-Rate %)."
+        "EFFECTIVE_TAKE_RATE_PCT": "Platform Net Revenue divided by GMV (Tableau Calculated Field: Effective Take-Rate %)."
       }
     },
     {
       "dataset": "urbanfork_gold_mart",
       "table": "DIM_PRIME_PARTNER_SCORECARD",
-      "description": "Certified Gold merchant tiering scorecard (Dataform + Power BI DirectQuery). A merchant earns IS_PRIME_PARTNER = TRUE iff trailing 90-day GMV > $25,000 AND avg kitchen prep < 14.0 min (excluding 3.8.0-beta) AND quality dispute rate < 2.0% AND rejection rate < 1.0%.",
+      "description": "Certified Gold merchant tiering scorecard (Dataform + Tableau Cloud Live). A merchant earns IS_PRIME_PARTNER = TRUE iff trailing 90-day GMV > $25,000 AND avg kitchen prep < 14.0 min (excluding 3.8.0-beta) AND quality dispute rate < 2.0% AND rejection rate < 1.0%.",
       "columns": {
         "MRC_ID": "Unique merchant identifier.",
         "TRAILING_90D_GMV_USD": "Completed delivered GMV over trailing 90 days (USD).",
@@ -138,7 +138,7 @@
     {
       "dataset": "urbanfork_gold_mart",
       "table": "DT_LIVE_ZONE_SUPPLY_DEFICIT",
-      "description": "Certified Gold live courier supply deficit mart (migrated from Snowflake Dynamic Table; Power BI DirectQuery). Safely isolated to the latest fleet snapshot per zone (avoids Snapshot Trap). Critical Deficit Zone threshold: SUPPLY_DEFICIT_RATIO >= 2.50.",
+      "description": "Certified Gold live courier supply deficit mart (migrated from Snowflake Dynamic Table; Tableau Cloud Live). Safely isolated to the latest fleet snapshot per zone (avoids Snapshot Trap). Critical Deficit Zone threshold: SUPPLY_DEFICIT_RATIO >= 2.50.",
       "columns": {
         "LATEST_SNAP_TS": "Latest 15-minute fleet snapshot timestamp per zone.",
         "ONLINE_CRR_N": "Latest live online couriers count in the zone.",

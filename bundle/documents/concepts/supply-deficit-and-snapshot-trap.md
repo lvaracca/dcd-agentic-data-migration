@@ -5,7 +5,7 @@ id: supply-deficit-and-snapshot-trap
 title: Live Fleet Supply Deficit & Snapshot Trap Prevention
 sources:
   - snowflake-source/03_streams_tasks_dynamic_tables.sql
-  - bi-powerbi/UrbanFork_Executive_Cockpit.SemanticModel/definition/tables/DT_LIVE_ZONE_SUPPLY_DEFICIT.tmdl
+  - bi-tableau/UrbanFork_Executive_Cockpit_Snowflake.twb
 ---
 
 # Live Fleet Supply Deficit Ratio (Snapshot Trap Guardrail)

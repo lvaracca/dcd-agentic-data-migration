@@ -2,13 +2,13 @@
 ## Scenario: "UrbanFork" — On-Demand Food & Grocery Delivery (45-Minute Live Cutover)
 
 > [!IMPORTANT]
-> **Core Demo Thesis ("End-to-End Seamless Cutover: Airbyte -> Warehouse & Orchestration -> Knowledge Catalog -> Power BI")**
-> Real enterprise migrations don't happen in a vacuum: Snowflake sits between upstream **ingestion pipelines (Airbyte)**, an internal **orchestrator (Snowflake Task Graphs & Dynamic Tables)**, and downstream **BI reports (Power BI)**.
-> In **45 minutes**, this live demo starts from a running **PostgreSQL -> Airbyte -> Snowflake (`URBANFORK_PROD`, Hybrid Iceberg + FDN) -> Power BI** stack and shows **Antigravity (AGY)** orchestrating a **zero-downtime, end-to-end cutover to Google Cloud**:
+> **Core Demo Thesis ("End-to-End Seamless Cutover: Airbyte -> Warehouse & Orchestration -> Knowledge Catalog -> Tableau Cloud")**
+> Real enterprise migrations don't happen in a vacuum: Snowflake sits between upstream **ingestion pipelines (Airbyte)**, an internal **orchestrator (Snowflake Task Graphs & Dynamic Tables)**, and downstream **BI reports (Tableau Cloud)**.
+> In **45 minutes**, this live demo starts from a running **PostgreSQL -> Airbyte -> Snowflake (`URBANFORK_PROD`, Hybrid Iceberg + FDN) -> Tableau Cloud** stack and shows **Antigravity (AGY)** orchestrating a **zero-downtime, end-to-end cutover to Google Cloud**:
 > 1. **Seamless Ingestion & Hybrid Data Cutover**: Zero-Copy **BigLake Iceberg** mount for large fact tables + Parquet/`JSON` unload for native `VARIANT` tables, followed by **live Airbyte destination re-pointing** (`destination-snowflake` -> `destination-bigquery`) preserving incremental cursors without dropping a single live order.
 > 2. **Orchestrator Migration (Snowflake 7-Task DAG -> BigQuery Dataform DAG)**: Full conversion of a 4-tier, **7-node Snowflake Task Graph** (`AFTER` fan-out/fan-in dependencies, CDC `STREAMS`, `DYNAMIC TABLE`, and Scripting Stored Procedure), **Snowpark Python**, and **Cortex AI** into a Git-versioned **Dataform** DAG (`.sqlx` + assertions + Workflow schedule), **Managed Spark**, and **BigQuery AI (TimesFM / Gemini)** with 100% mathematical parity.
-> 3. **Business Logic Rescue ("Knowledge-as-Code")**: Reverse-engineering undocumented KPI formulas, status flags, and join traps out of **Snowflake SQL, Snowpark Python, AND Power BI DAX (`.tmdl`)** into **Open Knowledge Format (OKF v0.2)** -> **BigQuery Metadata**, **Knowledge Catalog** (Business Glossary + Context Sets + Usage-Based Data Insights), and **BigQuery Conversational Analytics**.
-> 4. **Seamless Power BI Re-Pointing**: Unplugging the **Power BI Project (`.pbip` / TMDL)** from `Snowflake.Databases(...)` and plugging it directly into `GoogleBigQuery.Database(...)`—refreshing the exact same executive visuals with **zero broken DAX or charts**.
+> 3. **Business Logic Rescue ("Knowledge-as-Code")**: Reverse-engineering undocumented KPI formulas, status flags, and join traps out of **Snowflake SQL, Snowpark Python, AND Tableau Calculated Fields (`.twb`)** into **Open Knowledge Format (OKF v0.2)** -> **BigQuery Metadata**, **Knowledge Catalog** (Business Glossary + Context Sets + Usage-Based Data Insights), and **BigQuery Conversational Analytics**.
+> 4. **Seamless Tableau Cloud Cutover**: Unplugging the **Tableau Cloud Workbooks (`.twb`)** from `Snowflake.Databases(...)` and plugging it directly into `GoogleBigQuery.Database(...)`—refreshing the exact same executive visuals with **zero broken Calculated Fields or charts**.
 
 ---
 
@@ -16,11 +16,11 @@
 
 | Time | Act | Live Action Driven by Antigravity | Stack Components Shown |
 | :--- | :--- | :--- | :--- |
-| **00:00 – 05:00** *(5 min)* | **Act 1: Tour of the Live Legacy Stack & Audit** | Show the active legacy stack: **Airbyte** syncing OLTP Postgres -> **Snowflake (`URBANFORK_PROD`)**, the **7-Node Task Graph** in Snowsight, and the live **Power BI Executive Cockpit**. Antigravity audits the entire pipeline end-to-end. | Airbyte, Snowflake Task Graph, Power BI, Antigravity |
+| **00:00 – 05:00** *(5 min)* | **Act 1: Tour of the Live Legacy Stack & Audit** | Show the active legacy stack: **Airbyte** syncing OLTP Postgres -> **Snowflake (`URBANFORK_PROD`)**, the **7-Node Task Graph** in Snowsight, and the live **Tableau Cloud Executive Cockpit**. Antigravity audits the entire pipeline end-to-end. | Airbyte, Snowflake Task Graph, Tableau Cloud, Antigravity |
 | **05:00 – 13:00** *(8 min)* | **Act 2: Hybrid Data Migration & Seamless Airbyte Cutover** | 1. Mounts **4 GCS Iceberg tables Zero-Copy** in BigQuery BigLake (< 5s) and migrates **8 Native/`VARIANT` tables** to BigQuery (`JSON` + Policy Tags), starting the background Knowledge Catalog scan.<br>2. Rewrites `ingestion-airbyte/airbyte_terraform/main.tf` from `destination-snowflake` to `destination-bigquery`, injects **50 live OLTP orders**, runs Airbyte sync, and shows incremental orders landing seamlessly in BigQuery! | BigLake Iceberg, BigQuery Storage, Airbyte (`Postgres -> BQ`), Policy Tags |
 | **13:00 – 26:00** *(13 min)* | **Act 3: Snowflake Task Graph -> Dataform DAG (+ Spark & BQ AI)** | 1. **Orchestrator Focus (8 min)**: Converts the **7-node Snowflake Task DAG** (`TSK_00` -> `TSK_01A/B/C` -> `TSK_02A/B` -> `TSK_03`) + `DYNAMIC TABLE` into a **Dataform** DAG (`declarations/`, `staging/`, `marts/`, `operations/`, `assertions/`). Visually compare Snowsight's Task Graph with BigQuery Studio's **Dataform Compiled Graph**, run `dataform run`, and verify 100.00% cent-level parity!<br>2. **Spark & AI (5 min)**: Converts Snowpark fraud scoring to Dataproc Serverless PySpark and Cortex `CLASSIFY_TEXT` / `ML.FORECAST` to zero-shot BigQuery `AI.CLASSIFY` / `AI.FORECAST` (TimesFM). | Dataform DAG & Workflow Config, Managed Spark, BigQuery AI |
-| **26:00 – 37:00** *(11 min)* | **Act 4: Business Logic (SQL + Python + DAX) -> OKF -> Knowledge Catalog** | Antigravity extracts undocumented KPI formulas, status codes, and join caveats from **Snowflake SQL, Snowpark UDFs, AND Power BI `.tmdl` DAX measures** into **OKF v0.2** (`bundle/` & `okf/`). Publishes descriptions to BigQuery, populates **Knowledge Catalog Business Glossary** (`entryLinks`) & **Context Set**, and seeds `QUERY_HISTORY` for **Usage-Based Data Insights**. | Open Knowledge Format (OKF), Knowledge Catalog (Glossary, Context Set, Data Insights) |
-| **37:00 – 45:00** *(8 min)* | **Act 5: Power BI Unplug/Re-Plug & Conversational Analytics** | 1. **Power BI Cutover (4 min)**: Antigravity updates Power Query M partitions in `bi-powerbi/*.tmdl` from `Snowflake.Databases(...)` to `GoogleBigQuery.Database([UseStorageApi=true])`. Refresh Power BI -> **zero broken visuals, exact `$153,150.49` Q3 benchmark + the 50 new live Airbyte orders**, and shut down Snowflake!<br>2. **BigQuery Conversational Analytics (4 min)**: Live ad-hoc executive Q&A grounded in Knowledge Catalog (navigating SCD2, Snapshot Trap, and PII masking). | Power BI (`.pbip` / TMDL on BigQuery), BigQuery Conversational Analytics |
+| **26:00 – 37:00** *(11 min)* | **Act 4: Business Logic (SQL + Python + Calculated Fields) -> OKF -> Knowledge Catalog** | Antigravity extracts undocumented KPI formulas, status codes, and join caveats from **Snowflake SQL, Snowpark UDFs, AND Tableau `.twb` Calculated Fields** into **OKF v0.2** (`bundle/` & `okf/`). Publishes descriptions to BigQuery, populates **Knowledge Catalog Business Glossary** (`entryLinks`) & **Context Set**, and seeds `QUERY_HISTORY` for **Usage-Based Data Insights**. | Open Knowledge Format (OKF), Knowledge Catalog (Glossary, Context Set, Data Insights) |
+| **37:00 – 45:00** *(8 min)* | **Act 5: Tableau Cloud Cutover & Conversational Analytics** | 1. **Tableau Cloud Cutover (4 min)**: Antigravity updates Power Query M partitions in `bi-tableau/*.tmdl` from `Snowflake.Databases(...)` to `GoogleBigQuery.Database([UseStorageApi=true])`. Refresh Tableau Cloud -> **zero broken visuals, exact `$153,150.49` Q3 benchmark + the 50 new live Airbyte orders**, and shut down Snowflake!<br>2. **BigQuery Conversational Analytics (4 min)**: Live ad-hoc executive Q&A grounded in Knowledge Catalog (navigating SCD2, Snapshot Trap, and PII masking). | Tableau Cloud (`.twb` on BigQuery), BigQuery Conversational Analytics |
 
 ---
 
@@ -47,13 +47,13 @@ flowchart LR
         BQ_RAW["BigQuery Raw Layer\nZero-Copy BigLake Iceberg +\nNative JSON + Policy Tags/RLS"]
         DF_DAG["Dataform Orchestrator (.sqlx)\n7-Node Compiled DAG + Assertions\n+ Managed Spark + BigQuery AI"]
         BQ_MART["BigQuery Gold Marts\n100% Schema-Compatible Contract"]
-        KC["Knowledge Catalog (via OKF v0.2)\nGlossary + Context Set + Usage Joins\n(Extracted from SQL + Python + DAX)"]
+        KC["Knowledge Catalog (via OKF v0.2)\nGlossary + Context Set + Usage Joins\n(Extracted from SQL + Python + Calculated Fields)"]
         BQ_RAW --> DF_DAG --> BQ_MART
         BQ_RAW & BQ_MART --> KC
     end
 
     subgraph DOWN["Downstream BI & AI"]
-        PBI["Power BI Executive Cockpit (.pbip)\nUnplug Snowflake -> Plug into BigQuery"]
+        PBI["Tableau Cloud Executive Cockpit (.twb)\nUnplug Snowflake -> Plug into BigQuery"]
         CA["BigQuery Conversational Analytics\nAd-Hoc Grounded Q&A"]
     end
 
@@ -94,13 +94,13 @@ snowflake-demo/
 │   ├── 07_workload_query_history.sql         # Analyst queries populating QUERY_HISTORY
 │   ├── snowpark/snowpark_merchant_fraud_scoring.py
 │   └── cortex-analyst/cortex_ops_model.yaml
-├── bi-powerbi/                               # Downstream Power BI Project (.pbip / TMDL in Git!)
+├── bi-tableau/                               # Downstream Tableau Cloud Project (.pbip / TMDL in Git!)
 │   ├── UrbanFork_Executive_Cockpit.pbip
 │   ├── UrbanFork_Executive_Cockpit.SemanticModel/
 │   │   └── definition/
 │   │       ├── model.tmdl
 │   │       ├── expressions.tmdl              # SnowflakeHost / Warehouse parameters -> BigQuery
-│   │       └── tables/*.tmdl                 # M-Query partitions + 11 DAX Measures
+│   │       └── tables/*.tmdl                 # M-Query partitions + 11 Calculated Fields Measures
 │   └── UrbanFork_Executive_Cockpit.Report/
 │       ├── definition.pbir
 │       └── report.json
@@ -136,7 +136,7 @@ snowflake-demo/
 - **Pre-Migration State**: `airbyte_terraform/main.tf` defines `airbyte_source_postgres.urbanfork_oltp` syncing `dlv_ord_hdr`, `dlv_ord_item_ln`, and `dsp_refund_fct` in `incremental_deduped_history` mode (`cursor_field = ["updated_at"]`) into `airbyte_destination_snowflake.snowflake_ops_raw`.
 - **Live Cutover with Antigravity**:
   1. Antigravity inspects `main.tf`, adds `airbyte_destination_bigquery` (configured with GCS staging on `gs://<project>-urbanfork-lakehouse/airbyte-staging` in `us-central1`), and updates `airbyte_connection.urbanfork_oltp_incremental` to target BigQuery while retaining stream cursor watermarks (`2026-03-31 23:58:00`).
-  2. You run `python3 ingestion-airbyte/simulate_live_orders.py --count 50` to inject 50 live April 1st orders (`ORD-0090001`..`ORD-0090050`) into Postgres, trigger Airbyte sync, and watch those exact 50 incremental orders flow into BigQuery -> Dataform -> Power BI with **zero downtime and zero duplicate historical reload**.
+  2. You run `python3 ingestion-airbyte/simulate_live_orders.py --count 50` to inject 50 live April 1st orders (`ORD-0090001`..`ORD-0090050`) into Postgres, trigger Airbyte sync, and watch those exact 50 incremental orders flow into BigQuery -> Dataform -> Tableau Cloud with **zero downtime and zero duplicate historical reload**.
 
 ### 4.2 Orchestrator Migration: 7-Node Snowflake Task DAG -> Dataform DAG (`03_streams_tasks...`)
 
@@ -148,7 +148,7 @@ flowchart TD
     T1C["TSK_01C_STAGE_DISPUTES\n(Anti-fanout Refunds + 'CBK-' Join)"]
     T2A["TSK_02A_MART_NET_REVENUE\n(Multi-parent Fan-In + SCD2 Join)"]
     T2B["TSK_02B_MART_PRIME_PARTNERS\n(Multi-parent Fan-In + 4 Prime Rules)"]
-    T3["TSK_03_REFRESH_PBI_AND_AUDIT\n(Refreshes Power BI Summary +\nCalls SP_AUDIT_DISPUTE_CHARGEBACKS)"]
+    T3["TSK_03_REFRESH_PBI_AND_AUDIT\n(Refreshes Tableau Cloud Summary +\nCalls SP_AUDIT_DISPUTE_CHARGEBACKS)"]
 
     T0 --> T1A & T1B & T1C
     T1A & T1C --> T2A
@@ -164,9 +164,9 @@ flowchart TD
   - `definitions/operations/run_audit_chargebacks.sqlx` (`CALL sp_audit_dispute_chargebacks(500.0)`),
   - Dataform **Workflow Configuration** replacing Snowflake's 15-minute `CRON` task without keeping a Virtual Warehouse awake!
 
-### 4.3 Power BI Unplug & Re-Plug (`bi-powerbi/UrbanFork_Executive_Cockpit.pbip`)
-- Stored in Microsoft's modern **Power BI Project (`.pbip` + TMDL)** text format so Antigravity can read and refactor it directly in Git (compatible with **Power BI Service / Fabric Git Integration in any macOS browser** as well as Power BI Desktop on Windows):
-  - **Step 1 (Semantic Extraction in Act 4)**: Antigravity reads the **11 DAX Measures** across `FCT_PLATFORM_NET_REVENUE.tmdl`, `DIM_PRIME_PARTNER_SCORECARD.tmdl`, and `DT_LIVE_ZONE_SUPPLY_DEFICIT.tmdl` (e.g., `Effective Take-Rate %`, `Prime GMV Share %`, `Order-Weighted Kitchen Prep (Min)`, `Critical Deficit Zones`) and registers them into **Open Knowledge Format (OKF v0.2) & Knowledge Catalog** so Conversational Analytics and Power BI share **100% identical KPI definitions**!
+### 4.3 Tableau Cloud Cutover (`bi-tableau/UrbanFork_Executive_Cockpit_Snowflake.twb`)
+- Stored in Microsoft's modern **Tableau Cloud Project (`.pbip` + TMDL)** text format so Antigravity can read and refactor it directly in Git (compatible with **Tableau Cloud Service / Fabric Git Integration in any macOS browser** as well as Tableau Cloud Desktop on Windows):
+  - **Step 1 (Semantic Extraction in Act 4)**: Antigravity reads the **11 Calculated Fields Measures** across `FCT_PLATFORM_NET_REVENUE.tmdl`, `DIM_PRIME_PARTNER_SCORECARD.tmdl`, and `DT_LIVE_ZONE_SUPPLY_DEFICIT.tmdl` (e.g., `Effective Take-Rate %`, `Prime GMV Share %`, `Order-Weighted Kitchen Prep (Min)`, `Critical Deficit Zones`) and registers them into **Open Knowledge Format (OKF v0.2) & Knowledge Catalog** so Conversational Analytics and Tableau Cloud share **100% identical KPI definitions**!
   - **Step 2 (Seamless BI Cutover in Act 5)**: Antigravity rewrites the M-query `partition` source in all three `.tmdl` files from:
     ```powerquery
     Source = Snowflake.Databases(SnowflakeHost, SnowflakeWarehouse, [Role="ACCOUNTADMIN"])
@@ -175,4 +175,4 @@ flowchart TD
     ```powerquery
     Source = GoogleBigQuery.Database([BillingProject=GcpProjectId, UseStorageApi=true])
     ```
-    preserving uppercase column projections so **not a single DAX measure or visual breaks** upon refresh!
+    preserving uppercase column projections so **not a single Calculated Fields measure or visual breaks** upon refresh!

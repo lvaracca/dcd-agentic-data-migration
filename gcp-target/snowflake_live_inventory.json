@@ -110,6 +110,33 @@
     },
     {
       "TABLE_SCHEMA": "OPS_RAW",
+      "TABLE_NAME": "CDC_DLV_ORD_HDR",
+      "TABLE_TYPE": "BASE TABLE",
+      "IS_ICEBERG": "NO",
+      "ROW_COUNT": 1,
+      "BYTES": 2048,
+      "CLUSTERING_KEY": null
+    },
+    {
+      "TABLE_SCHEMA": "OPS_RAW",
+      "TABLE_NAME": "CDC_DLV_ORD_ITEM_LN",
+      "TABLE_TYPE": "BASE TABLE",
+      "IS_ICEBERG": "NO",
+      "ROW_COUNT": 1,
+      "BYTES": 1536,
+      "CLUSTERING_KEY": null
+    },
+    {
+      "TABLE_SCHEMA": "OPS_RAW",
+      "TABLE_NAME": "CDC_DSP_REFUND_FCT",
+      "TABLE_TYPE": "BASE TABLE",
+      "IS_ICEBERG": "NO",
+      "ROW_COUNT": 0,
+      "BYTES": 0,
+      "CLUSTERING_KEY": null
+    },
+    {
+      "TABLE_SCHEMA": "OPS_RAW",
       "TABLE_NAME": "CRR_COURIER_MSTR",
       "TABLE_TYPE": "BASE TABLE",
       "IS_ICEBERG": "NO",
