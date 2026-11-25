@@ -61,8 +61,8 @@ SELECT
     TRUE,
     FALSE
   ) AS IS_PRIME_PARTNER
-FROM ${ref("quickbite_raw_ops", "MRC_PARTNER_MSTR")} m
-JOIN ${ref("quickbite_raw_ops", "GEO_ZONE_LKP")} z
+FROM ${ref("urbanfork_raw_ops", "MRC_PARTNER_MSTR")} m
+JOIN ${ref("urbanfork_raw_ops", "GEO_ZONE_LKP")} z
   ON m.ZONE_ID = z.ZONE_ID
 LEFT JOIN agg a
   ON m.MRC_ID = a.MRC_ID

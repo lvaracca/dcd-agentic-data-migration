@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Turnkey Snowflake Enterprise Trial Provisioner for the QuickBite Migration Demo.
+Turnkey Snowflake Enterprise Trial Provisioner for the UrbanFork Migration Demo.
 
 Two-step execution (since Snowflake generates its GCP Service Account dynamically):
   Step 1: Create Warehouses, DB, External Volume & Storage Integration, and print
@@ -69,10 +69,10 @@ def step_1_init_gcs_integrations(conn: snowflake.connector.SnowflakeConnection, 
         pass
 
     cur = conn.cursor()
-    cur.execute("DESC EXTERNAL VOLUME QUICKBITE_GCS_ICEBERG_VOL")
+    cur.execute("DESC EXTERNAL VOLUME URBANFORK_GCS_ICEBERG_VOL")
     vol_sa = extract_gcp_sa_from_desc(cur.fetchall())
 
-    cur.execute("DESC STORAGE INTEGRATION QUICKBITE_GCS_INT")
+    cur.execute("DESC STORAGE INTEGRATION URBANFORK_GCS_INT")
     int_sa = extract_gcp_sa_from_desc(cur.fetchall())
 
     sa_set = {sa for sa in (vol_sa, int_sa) if sa}
@@ -86,7 +86,7 @@ def step_1_init_gcs_integrations(conn: snowflake.connector.SnowflakeConnection, 
 
 def step_2_deploy_all(conn: snowflake.connector.SnowflakeConnection, bucket: str) -> None:
     if not (DATA_DIR / "ground_truth_manifest.json").exists():
-        print("ERROR: Synthetic dataset not found in data-generator/output/. Run generate_quickbite_data.py first.")
+        print("ERROR: Synthetic dataset not found in data-generator/output/. Run generate_urbanfork_data.py first.")
         sys.exit(1)
 
     manifest = json.loads((DATA_DIR / "ground_truth_manifest.json").read_text(encoding="utf-8"))
@@ -94,14 +94,14 @@ def step_2_deploy_all(conn: snowflake.connector.SnowflakeConnection, bucket: str
 
     print("=== 1/8 Verifying Snowflake -> GCS Iceberg External Volume Connectivity ===")
     cur.execute("USE ROLE ACCOUNTADMIN")
-    cur.execute("SELECT SYSTEM$VERIFY_EXTERNAL_VOLUME('QUICKBITE_GCS_ICEBERG_VOL')")
+    cur.execute("SELECT SYSTEM$VERIFY_EXTERNAL_VOLUME('URBANFORK_GCS_ICEBERG_VOL')")
     print("   External Volume verified:", cur.fetchone()[0])
 
-    cur.execute("USE WAREHOUSE QB_LOAD_WH")
-    cur.execute("USE DATABASE QUICKBITE_PROD")
+    cur.execute("USE WAREHOUSE UF_LOAD_WH")
+    cur.execute("USE DATABASE URBANFORK_PROD")
     already_loaded = False
     try:
-        cur.execute("SELECT COUNT(*) FROM QUICKBITE_PROD.OPS_RAW.DLV_ORD_HDR")
+        cur.execute("SELECT COUNT(*) FROM URBANFORK_PROD.OPS_RAW.DLV_ORD_HDR")
         if cur.fetchone()[0] == manifest["table_row_counts"]["OPS_RAW.DLV_ORD_HDR"]:
             already_loaded = True
     except Exception:
@@ -130,13 +130,13 @@ def step_2_deploy_all(conn: snowflake.connector.SnowflakeConnection, bucket: str
         for gz_file in sorted(DATA_DIR.glob("*.csv.gz")):
             print(f"   PUT {gz_file.name} -> @OPS_RAW.SEED_LOAD_STAGE")
             cur.execute(
-                f"PUT 'file://{gz_file.as_posix()}' @QUICKBITE_PROD.OPS_RAW.SEED_LOAD_STAGE AUTO_COMPRESS=FALSE OVERWRITE=TRUE"
+                f"PUT 'file://{gz_file.as_posix()}' @URBANFORK_PROD.OPS_RAW.SEED_LOAD_STAGE AUTO_COMPRESS=FALSE OVERWRITE=TRUE"
             )
 
         jsonl_file = DATA_DIR / "app_delivery_pings.jsonl.gz"
         print(f"   PUT {jsonl_file.name} -> @IOT_RAW.IOT_LANDING_STAGE")
         cur.execute(
-            f"PUT 'file://{jsonl_file.as_posix()}' @QUICKBITE_PROD.IOT_RAW.IOT_LANDING_STAGE AUTO_COMPRESS=FALSE OVERWRITE=TRUE"
+            f"PUT 'file://{jsonl_file.as_posix()}' @URBANFORK_PROD.IOT_RAW.IOT_LANDING_STAGE AUTO_COMPRESS=FALSE OVERWRITE=TRUE"
         )
 
         copy_and_pipe_sql = "-- Bulk COPY INTO" + render_sql("02_load_and_snowpipe.sql", bucket).split(
@@ -149,12 +149,12 @@ def step_2_deploy_all(conn: snowflake.connector.SnowflakeConnection, bucket: str
 
     print("=== 5/8 Deploying 7-Node Snowflake Task DAG & Dynamic Table + Running Initial DAG Execution ===")
     conn.execute_string(render_sql("03_streams_tasks_dynamic_tables.sql", bucket), remove_comments=True)
-    cur.execute("EXECUTE TASK QUICKBITE_PROD.MART.TSK_00_ROOT_CDC_ROUTER")
+    cur.execute("EXECUTE TASK URBANFORK_PROD.MART.TSK_00_ROOT_CDC_ROUTER")
     print("   Triggered root task TSK_00_ROOT_CDC_ROUTER; waiting for 7-task DAG completion...")
     import time
     for _ in range(30):
         time.sleep(3)
-        cur.execute("SELECT COUNT(*) FROM QUICKBITE_PROD.MART.RPT_PBI_EXECUTIVE_SUMMARY")
+        cur.execute("SELECT COUNT(*) FROM URBANFORK_PROD.MART.RPT_PBI_EXECUTIVE_SUMMARY")
         if cur.fetchone()[0] > 0:
             print("   7-Node Snowflake Task DAG completed! Power BI Gold tables populated.")
             break
@@ -163,7 +163,7 @@ def step_2_deploy_all(conn: snowflake.connector.SnowflakeConnection, bucket: str
     # Materialize MART.USER_FRAUD_RISK_SCORES directly so Snowpark output table is immediately live
     cur.execute(
         """
-        CREATE OR REPLACE TABLE QUICKBITE_PROD.MART.USER_FRAUD_RISK_SCORES AS
+        CREATE OR REPLACE TABLE URBANFORK_PROD.MART.USER_FRAUD_RISK_SCORES AS
         WITH user_agg AS (
             SELECT
                 h.USR_ID,
@@ -172,8 +172,8 @@ def step_2_deploy_all(conn: snowflake.connector.SnowflakeConnection, bucket: str
                 COUNT_IF(d.DSP_RSN_CD = 4 OR d.RFND_STS_FLG = 9) AS FLAGGED_ABUSE_DISPUTES_CNT,
                 COUNT(DISTINCT IFF(d.DSP_ID IS NOT NULL, h.ZONE_ID, NULL)) AS DISPUTED_ZONES_CNT,
                 COALESCE(SUM(IFF(d.RFND_STS_FLG = 1, d.RFND_AMT_USD, 0)), 0) AS APPROVED_REFUND_TOTAL_USD
-            FROM QUICKBITE_PROD.OPS_RAW.DLV_ORD_HDR h
-            LEFT JOIN QUICKBITE_PROD.OPS_RAW.DSP_REFUND_FCT d ON h.ORD_ID = d.ORD_ID
+            FROM URBANFORK_PROD.OPS_RAW.DLV_ORD_HDR h
+            LEFT JOIN URBANFORK_PROD.OPS_RAW.DSP_REFUND_FCT d ON h.ORD_ID = d.ORD_ID
             WHERE h.ORD_STS_CD = 'D'
             GROUP BY h.USR_ID
         ),
@@ -181,7 +181,7 @@ def step_2_deploy_all(conn: snowflake.connector.SnowflakeConnection, bucket: str
             SELECT
                 ua.*,
                 u.HOME_ZONE_ID,
-                u.QB_PASS_FLG,
+                u.UF_PASS_FLG,
                 IFF(
                     ua.DELIVERED_ORDERS_CNT < 5 OR ua.TOTAL_DISPUTES_CNT = 0,
                     0.0,
@@ -196,7 +196,7 @@ def step_2_deploy_all(conn: snowflake.connector.SnowflakeConnection, bucket: str
                     )
                 ) AS FRAUD_RISK_SCORE
             FROM user_agg ua
-            JOIN QUICKBITE_PROD.OPS_RAW.CUST_USER_MSTR u ON ua.USR_ID = u.USR_ID
+            JOIN URBANFORK_PROD.OPS_RAW.CUST_USER_MSTR u ON ua.USR_ID = u.USR_ID
         )
         SELECT
             *,
@@ -223,7 +223,7 @@ def step_2_deploy_all(conn: snowflake.connector.SnowflakeConnection, bucket: str
     conn.execute_string(render_sql("07_workload_query_history.sql", bucket), remove_comments=True)
 
     for tbl, expected_cnt in manifest["table_row_counts"].items():
-        cur.execute(f"SELECT COUNT(*) FROM QUICKBITE_PROD.{tbl}")
+        cur.execute(f"SELECT COUNT(*) FROM URBANFORK_PROD.{tbl}")
         actual_cnt = cur.fetchone()[0]
         status = "OK" if actual_cnt == expected_cnt else "MISMATCH"
         print(f"   [{status}] {tbl:<32} rows = {actual_cnt:,} (expected {expected_cnt:,})")
@@ -231,7 +231,7 @@ def step_2_deploy_all(conn: snowflake.connector.SnowflakeConnection, bucket: str
     cur.execute(
         """
         SELECT ROUND(SUM(PLATFORM_NET_REVENUE_USD), 2)
-        FROM QUICKBITE_PROD.MART.VW_PLATFORM_NET_REVENUE
+        FROM URBANFORK_PROD.MART.VW_PLATFORM_NET_REVENUE
         WHERE CAL_DT BETWEEN '2025-07-01' AND '2025-09-30' AND VERT_CD = 1
         """
     )
@@ -240,17 +240,17 @@ def step_2_deploy_all(conn: snowflake.connector.SnowflakeConnection, bucket: str
     print(f"   [MATH CHECK] Q3 2025 Restaurant Net Revenue = ${q3_rev} (expected ${exp_rev})")
 
     # Suspend warehouses immediately so zero idle trial credits are burned
-    for wh in ("QB_LOAD_WH", "QB_TRANSFORM_WH"):
+    for wh in ("UF_LOAD_WH", "UF_TRANSFORM_WH"):
         try:
             cur.execute(f"ALTER WAREHOUSE {wh} SUSPEND")
         except Exception:
             pass
-    print("\n🎉 QUICKBITE_PROD Snowflake instance is 100% seeded, verified, and suspended (0 idle burn)!")
+    print("\n🎉 URBANFORK_PROD Snowflake instance is 100% seeded, verified, and suspended (0 idle burn)!")
 
 
 def main() -> None:
     load_dotenv(ROOT_DIR / ".env")
-    parser = argparse.ArgumentParser(description="Seed QuickBite Snowflake Demo Environment")
+    parser = argparse.ArgumentParser(description="Seed UrbanFork Snowflake Demo Environment")
     parser.add_argument("--step", choices=["1", "2"], required=True, help="1 = Init GCS Volume, 2 = Load & Deploy All")
     args = parser.parse_args()
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Live Order Traffic Simulator for Airbyte Cutover Demo (Act 2).
-Injects N incremental orders (ORD-0090001+) into quickbite-oltp-postgres running
+Injects N incremental orders (ORD-0090001+) into urbanfork-oltp-postgres running
 on the GCE VM `quickbite-airbyte-vm` via IAP SSH (no local Docker needed on Mac!).
 """
 
@@ -66,11 +66,11 @@ def inject_live_orders(count: int, start_seq: int) -> None:
         f"--zone={zone}",
         f"--project={project_id}",
         "--tunnel-through-iap",
-        "--command=sudo docker exec -i quickbite-oltp-postgres psql -U qb_airbyte_user -d quickbite_oltp -v ON_ERROR_STOP=1",
+        "--command=sudo docker exec -i urbanfork-oltp-postgres psql -U uf_airbyte_user -d urbanfork_oltp -v ON_ERROR_STOP=1",
     ]
     res = subprocess.run(cmd, input=sql_payload, text=True, capture_output=True, env=env)
     if res.returncode != 0:
-        print("ERROR injecting live orders into quickbite-oltp-postgres on GCE VM:", res.stderr)
+        print("ERROR injecting live orders into urbanfork-oltp-postgres on GCE VM:", res.stderr)
         sys.exit(1)
 
     print(f"✅ Injected {count} new live orders (ORD-{start_seq:07d} .. ORD-{start_seq + count - 1:07d}) @ 2026-04-01 into PostgreSQL OLTP!")

@@ -36,8 +36,8 @@ def main() -> None:
     load_dotenv(ROOT_DIR / ".env")
     project_id = os.environ["GCP_PROJECT_ID"]
     region = os.environ.get("GCP_REGION", "us-central1")
-    raw_ds = os.environ.get("BQ_RAW_DATASET", "quickbite_raw_ops")
-    iot_ds = os.environ.get("BQ_IOT_DATASET", "quickbite_raw_iot")
+    raw_ds = os.environ.get("BQ_RAW_DATASET", "urbanfork_raw_ops")
+    iot_ds = os.environ.get("BQ_IOT_DATASET", "urbanfork_raw_iot")
 
     if MANIFEST_PATH.exists():
         print(f"=== 1/2 Pushing OKF Table & Column Descriptions from {MANIFEST_PATH.name} to BigQuery ===")
@@ -95,7 +95,7 @@ def main() -> None:
 
     -- Seed 3: Latest Snapshot Fleet Supply + User + Courier + Native JSON Telemetry Join
     SELECT
-      u.QB_PASS_FLG,
+      u.UF_PASS_FLG,
       c.VEH_TP_CD,
       COUNT(DISTINCT h.ORD_ID) AS ORDERS_CNT,
       ROUND(AVG(LAX_INT64(p.PAYLOAD.metrics.travel_sec) / 60.0), 2) AS AVG_TRAVEL_MIN

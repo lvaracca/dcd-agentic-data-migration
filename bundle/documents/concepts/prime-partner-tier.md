@@ -6,7 +6,7 @@ title: Prime Partner Tiering & SLA Telemetry Guardrails
 sources:
   - snowflake-source/03_streams_tasks_dynamic_tables.sql
   - snowflake-source/04_legacy_views_and_procs.sql
-  - bi-powerbi/QuickBite_Executive_Cockpit.SemanticModel/definition/tables/DIM_PRIME_PARTNER_SCORECARD.tmdl
+  - bi-powerbi/UrbanFork_Executive_Cockpit.SemanticModel/definition/tables/DIM_PRIME_PARTNER_SCORECARD.tmdl
 ---
 
 # Prime Partner Eligibility Criteria (Trailing 90 Days)

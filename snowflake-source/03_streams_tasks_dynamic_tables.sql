@@ -1,5 +1,5 @@
 -- =============================================================================
--- QuickBite Snowflake Source Setup — Step 3: Snowflake Orchestrator (7-Task DAG)
+-- UrbanFork Snowflake Source Setup — Step 3: Snowflake Orchestrator (7-Task DAG)
 -- & Dynamic Tables
 --
 -- DEMO HIGHLIGHT (Snowflake Tasks -> BigQuery Dataform Migration):
@@ -23,8 +23,8 @@
 -- Git-versioned Dataform DAG (.sqlx models, assertions & Workflow Config) on GCP!
 -- =============================================================================
 USE ROLE ACCOUNTADMIN;
-USE WAREHOUSE QB_TRANSFORM_WH;
-USE DATABASE QUICKBITE_PROD;
+USE WAREHOUSE UF_TRANSFORM_WH;
+USE DATABASE URBANFORK_PROD;
 
 -- -----------------------------------------------------------------------------
 -- 1. CDC Streams on Raw Landing Tables (fed upstream by Airbyte)
@@ -42,7 +42,7 @@ CREATE OR REPLACE STREAM OPS_RAW.STRM_DSP_REFUND_FCT
 -- -----------------------------------------------------------------------------
 CREATE OR REPLACE DYNAMIC TABLE MART.DT_LIVE_ZONE_SUPPLY_DEFICIT
     TARGET_LAG = '15 minutes'
-    WAREHOUSE = QB_TRANSFORM_WH
+    WAREHOUSE = UF_TRANSFORM_WH
     INITIALIZE = ON_CREATE
 AS
 SELECT
@@ -163,7 +163,7 @@ CREATE OR REPLACE TABLE MART.RPT_PBI_EXECUTIVE_SUMMARY (
 
 -- [ROOT] Tier 0: Cron-scheduled orchestrator gate
 CREATE OR REPLACE TASK MART.TSK_00_ROOT_CDC_ROUTER
-    WAREHOUSE = QB_TRANSFORM_WH
+    WAREHOUSE = UF_TRANSFORM_WH
     SCHEDULE = 'USING CRON 0/15 * * * * UTC'
     COMMENT = 'Root orchestrator task: checks upstream Airbyte CDC streams and triggers staging fan-out'
 AS
@@ -171,7 +171,7 @@ SELECT CURRENT_TIMESTAMP() AS DAG_TRIGGER_TS;
 
 -- [TIER 1A] Stage Orders & Pre-Aggregate Basket GMV (prevents line-item fan-out)
 CREATE OR REPLACE TASK MART.TSK_01A_STAGE_ORDERS
-    WAREHOUSE = QB_TRANSFORM_WH
+    WAREHOUSE = UF_TRANSFORM_WH
     AFTER MART.TSK_00_ROOT_CDC_ROUTER
 AS
 INSERT OVERWRITE INTO MART.STG_ORDER_BASKETS
@@ -206,7 +206,7 @@ LEFT JOIN basket b ON h.ORD_ID = b.ORD_ID;
 
 -- [TIER 1B] Parse Semi-Structured VARIANT Delivery Pings (excludes 3.8.0-beta GPS bug)
 CREATE OR REPLACE TASK MART.TSK_01B_PARSE_PINGS
-    WAREHOUSE = QB_TRANSFORM_WH
+    WAREHOUSE = UF_TRANSFORM_WH
     AFTER MART.TSK_00_ROOT_CDC_ROUTER
 AS
 INSERT OVERWRITE INTO MART.STG_CLEAN_DELIVERY_PINGS
@@ -225,7 +225,7 @@ QUALIFY ROW_NUMBER() OVER (PARTITION BY p.ORD_ID ORDER BY p.INGEST_TS DESC) = 1;
 
 -- [TIER 1C] Pre-Aggregate Disputes & Chargebacks ('CBK-' || ORD_ID string join)
 CREATE OR REPLACE TASK MART.TSK_01C_STAGE_DISPUTES
-    WAREHOUSE = QB_TRANSFORM_WH
+    WAREHOUSE = UF_TRANSFORM_WH
     AFTER MART.TSK_00_ROOT_CDC_ROUTER
 AS
 INSERT OVERWRITE INTO MART.STG_ORDER_DISPUTES_AGG
@@ -242,7 +242,7 @@ GROUP BY d.ORD_ID;
 
 -- [TIER 2A] Multi-Parent Fan-In Task: Build Gold Platform Net Revenue Mart (SCD2 Join)
 CREATE OR REPLACE TASK MART.TSK_02A_MART_NET_REVENUE
-    WAREHOUSE = QB_TRANSFORM_WH
+    WAREHOUSE = UF_TRANSFORM_WH
     AFTER MART.TSK_01A_STAGE_ORDERS, MART.TSK_01C_STAGE_DISPUTES
 AS
 INSERT OVERWRITE INTO MART.FCT_PLATFORM_NET_REVENUE
@@ -293,7 +293,7 @@ GROUP BY 1, 2, 3, 4, 5, 6, 7, 8;
 
 -- [TIER 2B] Multi-Parent Fan-In Task: Build Gold Prime Partner Scorecard
 CREATE OR REPLACE TASK MART.TSK_02B_MART_PRIME_PARTNERS
-    WAREHOUSE = QB_TRANSFORM_WH
+    WAREHOUSE = UF_TRANSFORM_WH
     AFTER MART.TSK_01A_STAGE_ORDERS, MART.TSK_01B_PARSE_PINGS, MART.TSK_01C_STAGE_DISPUTES
 AS
 INSERT OVERWRITE INTO MART.DIM_PRIME_PARTNER_SCORECARD
@@ -350,7 +350,7 @@ WHERE m.ACTIVE_FLG = 1;
 
 -- [TIER 3] Final Fan-In Task: Refresh Power BI Executive Summary & Run Compliance Audit
 CREATE OR REPLACE TASK MART.TSK_03_REFRESH_PBI_AND_AUDIT
-    WAREHOUSE = QB_TRANSFORM_WH
+    WAREHOUSE = UF_TRANSFORM_WH
     AFTER MART.TSK_02A_MART_NET_REVENUE, MART.TSK_02B_MART_PRIME_PARTNERS
 AS
 EXECUTE IMMEDIATE

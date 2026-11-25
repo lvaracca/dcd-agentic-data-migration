@@ -10,13 +10,13 @@ CREATE OR REPLACE PROCEDURE `${dataform.projectConfig.defaultDatabase}.${datafor
   P_HOLD_THRESHOLD_USD FLOAT64
 )
 BEGIN
-  UPDATE `${dataform.projectConfig.defaultDatabase}.quickbite_raw_ops.MRC_PAYOUT_LEDGER` tgt
+  UPDATE `${dataform.projectConfig.defaultDatabase}.urbanfork_raw_ops.MRC_PAYOUT_LEDGER` tgt
   SET PYT_STS_FLG = 9
   WHERE tgt.PYT_STS_FLG = 0
     AND tgt.REF_DOC_TXT LIKE 'STL-%'
     AND tgt.MRC_ID IN (
       SELECT MRC_ID
-      FROM `${dataform.projectConfig.defaultDatabase}.quickbite_raw_ops.MRC_PAYOUT_LEDGER`
+      FROM `${dataform.projectConfig.defaultDatabase}.urbanfork_raw_ops.MRC_PAYOUT_LEDGER`
       WHERE REF_DOC_TXT LIKE 'CBK-%'
       GROUP BY MRC_ID
       HAVING SUM(ABS(CAST(LEDGER_AMT_USD AS FLOAT64))) >= P_HOLD_THRESHOLD_USD

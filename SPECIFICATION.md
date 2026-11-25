@@ -1,10 +1,10 @@
 # End-to-End Demo Specification: Seamless Snowflake-to-GCP Stack Migration with Antigravity
-## Scenario: "QuickBite" — On-Demand Food & Grocery Delivery (45-Minute Live Cutover)
+## Scenario: "UrbanFork" — On-Demand Food & Grocery Delivery (45-Minute Live Cutover)
 
 > [!IMPORTANT]
 > **Core Demo Thesis ("End-to-End Seamless Cutover: Airbyte -> Warehouse & Orchestration -> Knowledge Catalog -> Power BI")**
 > Real enterprise migrations don't happen in a vacuum: Snowflake sits between upstream **ingestion pipelines (Airbyte)**, an internal **orchestrator (Snowflake Task Graphs & Dynamic Tables)**, and downstream **BI reports (Power BI)**.
-> In **45 minutes**, this live demo starts from a running **PostgreSQL -> Airbyte -> Snowflake (`QUICKBITE_PROD`, Hybrid Iceberg + FDN) -> Power BI** stack and shows **Antigravity (AGY)** orchestrating a **zero-downtime, end-to-end cutover to Google Cloud**:
+> In **45 minutes**, this live demo starts from a running **PostgreSQL -> Airbyte -> Snowflake (`URBANFORK_PROD`, Hybrid Iceberg + FDN) -> Power BI** stack and shows **Antigravity (AGY)** orchestrating a **zero-downtime, end-to-end cutover to Google Cloud**:
 > 1. **Seamless Ingestion & Hybrid Data Cutover**: Zero-Copy **BigLake Iceberg** mount for large fact tables + Parquet/`JSON` unload for native `VARIANT` tables, followed by **live Airbyte destination re-pointing** (`destination-snowflake` -> `destination-bigquery`) preserving incremental cursors without dropping a single live order.
 > 2. **Orchestrator Migration (Snowflake 7-Task DAG -> BigQuery Dataform DAG)**: Full conversion of a 4-tier, **7-node Snowflake Task Graph** (`AFTER` fan-out/fan-in dependencies, CDC `STREAMS`, `DYNAMIC TABLE`, and Scripting Stored Procedure), **Snowpark Python**, and **Cortex AI** into a Git-versioned **Dataform** DAG (`.sqlx` + assertions + Workflow schedule), **Managed Spark**, and **BigQuery AI (TimesFM / Gemini)** with 100% mathematical parity.
 > 3. **Business Logic Rescue ("Knowledge-as-Code")**: Reverse-engineering undocumented KPI formulas, status flags, and join traps out of **Snowflake SQL, Snowpark Python, AND Power BI DAX (`.tmdl`)** into **Open Knowledge Format (OKF v0.2)** -> **BigQuery Metadata**, **Knowledge Catalog** (Business Glossary + Context Sets + Usage-Based Data Insights), and **BigQuery Conversational Analytics**.
@@ -16,7 +16,7 @@
 
 | Time | Act | Live Action Driven by Antigravity | Stack Components Shown |
 | :--- | :--- | :--- | :--- |
-| **00:00 – 05:00** *(5 min)* | **Act 1: Tour of the Live Legacy Stack & Audit** | Show the active legacy stack: **Airbyte** syncing OLTP Postgres -> **Snowflake (`QUICKBITE_PROD`)**, the **7-Node Task Graph** in Snowsight, and the live **Power BI Executive Cockpit**. Antigravity audits the entire pipeline end-to-end. | Airbyte, Snowflake Task Graph, Power BI, Antigravity |
+| **00:00 – 05:00** *(5 min)* | **Act 1: Tour of the Live Legacy Stack & Audit** | Show the active legacy stack: **Airbyte** syncing OLTP Postgres -> **Snowflake (`URBANFORK_PROD`)**, the **7-Node Task Graph** in Snowsight, and the live **Power BI Executive Cockpit**. Antigravity audits the entire pipeline end-to-end. | Airbyte, Snowflake Task Graph, Power BI, Antigravity |
 | **05:00 – 13:00** *(8 min)* | **Act 2: Hybrid Data Migration & Seamless Airbyte Cutover** | 1. Mounts **4 GCS Iceberg tables Zero-Copy** in BigQuery BigLake (< 5s) and migrates **8 Native/`VARIANT` tables** to BigQuery (`JSON` + Policy Tags), starting the background Knowledge Catalog scan.<br>2. Rewrites `ingestion-airbyte/airbyte_terraform/main.tf` from `destination-snowflake` to `destination-bigquery`, injects **50 live OLTP orders**, runs Airbyte sync, and shows incremental orders landing seamlessly in BigQuery! | BigLake Iceberg, BigQuery Storage, Airbyte (`Postgres -> BQ`), Policy Tags |
 | **13:00 – 26:00** *(13 min)* | **Act 3: Snowflake Task Graph -> Dataform DAG (+ Spark & BQ AI)** | 1. **Orchestrator Focus (8 min)**: Converts the **7-node Snowflake Task DAG** (`TSK_00` -> `TSK_01A/B/C` -> `TSK_02A/B` -> `TSK_03`) + `DYNAMIC TABLE` into a **Dataform** DAG (`declarations/`, `staging/`, `marts/`, `operations/`, `assertions/`). Visually compare Snowsight's Task Graph with BigQuery Studio's **Dataform Compiled Graph**, run `dataform run`, and verify 100.00% cent-level parity!<br>2. **Spark & AI (5 min)**: Converts Snowpark fraud scoring to Dataproc Serverless PySpark and Cortex `CLASSIFY_TEXT` / `ML.FORECAST` to zero-shot BigQuery `AI.CLASSIFY` / `AI.FORECAST` (TimesFM). | Dataform DAG & Workflow Config, Managed Spark, BigQuery AI |
 | **26:00 – 37:00** *(11 min)* | **Act 4: Business Logic (SQL + Python + DAX) -> OKF -> Knowledge Catalog** | Antigravity extracts undocumented KPI formulas, status codes, and join caveats from **Snowflake SQL, Snowpark UDFs, AND Power BI `.tmdl` DAX measures** into **OKF v0.2** (`bundle/` & `okf/`). Publishes descriptions to BigQuery, populates **Knowledge Catalog Business Glossary** (`entryLinks`) & **Context Set**, and seeds `QUERY_HISTORY` for **Usage-Based Data Insights**. | Open Knowledge Format (OKF), Knowledge Catalog (Glossary, Context Set, Data Insights) |
@@ -31,7 +31,7 @@
 ```mermaid
 flowchart LR
     subgraph UP["Upstream Operational Source"]
-        PG["PostgreSQL OLTP\n(quickbite-oltp-postgres)"]
+        PG["PostgreSQL OLTP\n(urbanfork-oltp-postgres)"]
         AB["Airbyte Incremental Sync\n(Terraform-managed)"]
         PG --> AB
     end
@@ -80,7 +80,7 @@ snowflake-demo/
 │       ├── main.tf
 │       └── variables.tf
 ├── data-generator/                           # Deterministic Synthetic Data & Snowflake Seeder
-│   ├── generate_quickbite_data.py            # Generates 624,924 rows (seed=42) + ground_truth_manifest.json
+│   ├── generate_urbanfork_data.py            # Generates 624,924 rows (seed=42) + ground_truth_manifest.json
 │   ├── seed_snowflake_instance.py            # 2-step provisioner for Snowflake 30-day Enterprise Trial
 │   └── output/                               # Generated .csv.gz, .jsonl.gz & ground_truth_manifest.json
 ├── snowflake-source/                         # Complete Legacy Snowflake Codebase
@@ -95,13 +95,13 @@ snowflake-demo/
 │   ├── snowpark/snowpark_merchant_fraud_scoring.py
 │   └── cortex-analyst/cortex_ops_model.yaml
 ├── bi-powerbi/                               # Downstream Power BI Project (.pbip / TMDL in Git!)
-│   ├── QuickBite_Executive_Cockpit.pbip
-│   ├── QuickBite_Executive_Cockpit.SemanticModel/
+│   ├── UrbanFork_Executive_Cockpit.pbip
+│   ├── UrbanFork_Executive_Cockpit.SemanticModel/
 │   │   └── definition/
 │   │       ├── model.tmdl
 │   │       ├── expressions.tmdl              # SnowflakeHost / Warehouse parameters -> BigQuery
 │   │       └── tables/*.tmdl                 # M-Query partitions + 11 DAX Measures
-│   └── QuickBite_Executive_Cockpit.Report/
+│   └── UrbanFork_Executive_Cockpit.Report/
 │       ├── definition.pbir
 │       └── report.json
 ├── gcp-target/                               # Populated live by Antigravity (Dataform, Spark, BQ AI, RLS/CLS)
@@ -120,7 +120,7 @@ snowflake-demo/
 | **3** | `OPS_RAW.ZNE_FLEET_SNAP` | **Iceberg (`GCS`)** | `SNAP_TS`, `ZONE_ID`, `ONLINE_CRR_N`, `BUSY_CRR_N`, `UNASSIGNED_ORD_N` | **Zero-Copy BigLake Iceberg** | **60,372**. **Trap #3 (Snapshot Trap)**: London latest=`95` vs naive sum=`76,734`! |
 | **4** | `OPS_RAW.MRC_PAYOUT_LEDGER` | **Iceberg (`GCS`)** | `LEDGER_ID`, `REF_DOC_TXT`, `MRC_ID`, `ISSUE_DT`, `PAID_DT`, `LEDGER_AMT_USD`, `PYT_STS_FLG` | **Zero-Copy BigLake Iceberg** | **13,746**. **Trap #4 (`'CBK-' \|\| ORD_ID` Concat)**. |
 | **5** | `IOT_RAW.APP_DELIVERY_PINGS` | **Native FDN (`VARIANT`)** + `PIPE` | `PING_ID`, `INGEST_TS`, `ORD_ID`, `PAYLOAD` (`VARIANT`) | Unload -> **BigQuery Native `JSON`** | **142,285**. Nested JSON + `1,933` `3.8.0-beta` GPS bug orders. |
-| **6** | `OPS_RAW.CUST_USER_MSTR` | **Native FDN** + Masking | `USR_ID`, `F_NM`, `L_NM`, `EMAIL_TXT`, `PHONE_TXT`, `SIGNUP_DT`, `HOME_ZONE_ID`, `QB_PASS_FLG` | **BigQuery Native + Policy Tags (CLS)** | **30,000** (includes `45` planted serial refund abusers). |
+| **6** | `OPS_RAW.CUST_USER_MSTR` | **Native FDN** + Masking | `USR_ID`, `F_NM`, `L_NM`, `EMAIL_TXT`, `PHONE_TXT`, `SIGNUP_DT`, `HOME_ZONE_ID`, `UF_PASS_FLG` | **BigQuery Native + Policy Tags (CLS)** | **30,000** (includes `45` planted serial refund abusers). |
 | **7** | `OPS_RAW.CRR_COURIER_MSTR` | **Native FDN** + Masking | `CRR_ID`, `CRR_FULL_NM`, `PHONE_TXT`, `VEH_TP_CD`, `HOME_ZONE_ID`, `ACTIVE_FLG` | **BigQuery Native + Policy Tags (CLS)** | **2,500**. |
 | **8** | `OPS_RAW.GEO_ZONE_LKP` | **Native FDN** + RLS | `ZONE_ID`, `CITY_NM`, `CNTRY_CD`, `REG_CD`, `SLA_TARGET_MIN` | **BigQuery Native + Row Access Policy** | **36** zones across 12 global cities. |
 | **9** | `OPS_RAW.MRC_PARTNER_MSTR` | **Native FDN** | `MRC_ID`, `MRC_NM`, `VERT_CD`, `CUISINE_CAT`, `ZONE_ID`, `ONBOARD_DT`, `ACTIVE_FLG` | **BigQuery Native** (`CLUSTER BY ZONE_ID, VERT_CD`) | **400** merchants (300 restaurants, 100 dark-stores). |
@@ -133,9 +133,9 @@ snowflake-demo/
 ## 4. Deep Dive on the Three New End-to-End Highlights
 
 ### 4.1 Seamless Ingestion Cutover with Airbyte (`ingestion-airbyte/`)
-- **Pre-Migration State**: `airbyte_terraform/main.tf` defines `airbyte_source_postgres.quickbite_oltp` syncing `dlv_ord_hdr`, `dlv_ord_item_ln`, and `dsp_refund_fct` in `incremental_deduped_history` mode (`cursor_field = ["updated_at"]`) into `airbyte_destination_snowflake.snowflake_ops_raw`.
+- **Pre-Migration State**: `airbyte_terraform/main.tf` defines `airbyte_source_postgres.urbanfork_oltp` syncing `dlv_ord_hdr`, `dlv_ord_item_ln`, and `dsp_refund_fct` in `incremental_deduped_history` mode (`cursor_field = ["updated_at"]`) into `airbyte_destination_snowflake.snowflake_ops_raw`.
 - **Live Cutover with Antigravity**:
-  1. Antigravity inspects `main.tf`, adds `airbyte_destination_bigquery` (configured with GCS staging on `gs://<project>-quickbite-lakehouse/airbyte-staging` in `us-central1`), and updates `airbyte_connection.quickbite_oltp_incremental` to target BigQuery while retaining stream cursor watermarks (`2026-03-31 23:58:00`).
+  1. Antigravity inspects `main.tf`, adds `airbyte_destination_bigquery` (configured with GCS staging on `gs://<project>-urbanfork-lakehouse/airbyte-staging` in `us-central1`), and updates `airbyte_connection.urbanfork_oltp_incremental` to target BigQuery while retaining stream cursor watermarks (`2026-03-31 23:58:00`).
   2. You run `python3 ingestion-airbyte/simulate_live_orders.py --count 50` to inject 50 live April 1st orders (`ORD-0090001`..`ORD-0090050`) into Postgres, trigger Airbyte sync, and watch those exact 50 incremental orders flow into BigQuery -> Dataform -> Power BI with **zero downtime and zero duplicate historical reload**.
 
 ### 4.2 Orchestrator Migration: 7-Node Snowflake Task DAG -> Dataform DAG (`03_streams_tasks...`)
@@ -164,7 +164,7 @@ flowchart TD
   - `definitions/operations/run_audit_chargebacks.sqlx` (`CALL sp_audit_dispute_chargebacks(500.0)`),
   - Dataform **Workflow Configuration** replacing Snowflake's 15-minute `CRON` task without keeping a Virtual Warehouse awake!
 
-### 4.3 Power BI Unplug & Re-Plug (`bi-powerbi/QuickBite_Executive_Cockpit.pbip`)
+### 4.3 Power BI Unplug & Re-Plug (`bi-powerbi/UrbanFork_Executive_Cockpit.pbip`)
 - Stored in Microsoft's modern **Power BI Project (`.pbip` + TMDL)** text format so Antigravity can read and refactor it directly in Git (compatible with **Power BI Service / Fabric Git Integration in any macOS browser** as well as Power BI Desktop on Windows):
   - **Step 1 (Semantic Extraction in Act 4)**: Antigravity reads the **11 DAX Measures** across `FCT_PLATFORM_NET_REVENUE.tmdl`, `DIM_PRIME_PARTNER_SCORECARD.tmdl`, and `DT_LIVE_ZONE_SUPPLY_DEFICIT.tmdl` (e.g., `Effective Take-Rate %`, `Prime GMV Share %`, `Order-Weighted Kitchen Prep (Min)`, `Critical Deficit Zones`) and registers them into **Open Knowledge Format (OKF v0.2) & Knowledge Catalog** so Conversational Analytics and Power BI share **100% identical KPI definitions**!
   - **Step 2 (Seamless BI Cutover in Act 5)**: Antigravity rewrites the M-query `partition` source in all three `.tmdl` files from:

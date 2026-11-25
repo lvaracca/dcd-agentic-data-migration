@@ -1,7 +1,7 @@
 ---
 name: snowflake-live-audit
 description: >-
-  Audits the live Snowflake QUICKBITE_PROD instance, upstream Airbyte Terraform
+  Audits the live Snowflake URBANFORK_PROD instance, upstream Airbyte Terraform
   ingestion config, 7-node Snowflake Task Graph, governance policies, and
   downstream Power BI (.pbip / TMDL) semantic model to produce an end-to-end
   GCP migration blueprint. Use during Act 1 when asked to inspect, discover, or
@@ -21,7 +21,7 @@ description: >-
 
 2. **Inspect Upstream Ingestion & Downstream BI**:
    - Read `ingestion-airbyte/airbyte_terraform/main.tf` to identify active incremental streams (`dlv_ord_hdr`, `dlv_ord_item_ln`, `dsp_refund_fct`) and cursor fields (`updated_at`).
-   - Read `bi-powerbi/QuickBite_Executive_Cockpit.SemanticModel/definition/tables/*.tmdl` to list every Snowflake `MART` table and DAX measure consumed by Power BI.
+   - Read `bi-powerbi/UrbanFork_Executive_Cockpit.SemanticModel/definition/tables/*.tmdl` to list every Snowflake `MART` table and DAX measure consumed by Power BI.
 
 3. **Generate Migration Blueprint**:
    Write `gcp-target/MIGRATION_AUDIT_REPORT.md` summarizing:

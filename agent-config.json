@@ -1,31 +1,31 @@
 {
-  "description": "Isolated configuration for Antigravity Snowflake-to-GCP QuickBite Migration Demo",
-  "demo_scenario": "QuickBite On-Demand Food & Grocery Delivery",
+  "description": "Isolated configuration for Antigravity Snowflake-to-GCP UrbanFork Migration Demo",
+  "demo_scenario": "UrbanFork On-Demand Food & Grocery Delivery",
   "gcp": {
     "project_id": "dcd-migration-demo",
     "region": "us-central1",
-    "lakehouse_bucket": "dcd-migration-demo-quickbite-lakehouse",
+    "lakehouse_bucket": "dcd-migration-demo-urbanfork-lakehouse",
     "biglake_connection_id": "biglake-iceberg-conn",
-    "raw_ops_dataset": "quickbite_raw_ops",
-    "raw_iot_dataset": "quickbite_raw_iot",
-    "gold_mart_dataset": "quickbite_gold_mart",
+    "raw_ops_dataset": "urbanfork_raw_ops",
+    "raw_iot_dataset": "urbanfork_raw_iot",
+    "gold_mart_dataset": "urbanfork_gold_mart",
     "knowledge_catalog_location": "us-central1",
     "business_glossary_location": "global",
-    "business_glossary_id": "quickbite-enterprise-glossary",
-    "context_set_id": "quickbite-marketplace-context"
+    "business_glossary_id": "urbanfork-enterprise-glossary",
+    "context_set_id": "urbanfork-marketplace-context"
   },
   "snowflake": {
     "account": "zsemzzy-il11049",
     "host": "zsemzzy-il11049.snowflakecomputing.com",
-    "database": "QUICKBITE_PROD",
+    "database": "URBANFORK_PROD",
     "schemas": [
       "OPS_RAW",
       "IOT_RAW",
       "MART",
       "GOVERNANCE"
     ],
-    "external_volume": "QUICKBITE_GCS_ICEBERG_VOL",
-    "storage_integration": "QUICKBITE_GCS_INT",
+    "external_volume": "URBANFORK_GCS_ICEBERG_VOL",
+    "storage_integration": "URBANFORK_GCS_INT",
     "iceberg_tables": [
       "OPS_RAW.DLV_ORD_HDR",
       "OPS_RAW.DLV_ORD_ITEM_LN",

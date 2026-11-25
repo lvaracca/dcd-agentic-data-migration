@@ -12,14 +12,14 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 ROOT_DIR = Path(__file__).resolve().parents[4]
-TMDL_DIR = ROOT_DIR / "bi-powerbi" / "QuickBite_Executive_Cockpit.SemanticModel" / "definition"
+TMDL_DIR = ROOT_DIR / "bi-powerbi" / "UrbanFork_Executive_Cockpit.SemanticModel" / "definition"
 
 
 def main() -> None:
     load_dotenv(ROOT_DIR / ".env")
     project_id = os.getenv("GCP_PROJECT_ID", "")
     region = os.getenv("GCP_REGION", "us-central1")
-    mart_ds = os.getenv("BQ_MART_DATASET", "quickbite_gold_mart")
+    mart_ds = os.getenv("BQ_MART_DATASET", "urbanfork_gold_mart")
 
     errors: list[str] = []
     tables_checked = 0

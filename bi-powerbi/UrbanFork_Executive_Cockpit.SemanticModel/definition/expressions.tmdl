@@ -2,4 +2,4 @@
 /// Cut over seamlessly from Snowflake in Act 5 by Antigravity!
 expression GcpProjectId = "dcd-migration-demo" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
 
-expression BigQueryDataset = "quickbite_gold_mart" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+expression BigQueryDataset = "urbanfork_gold_mart" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]

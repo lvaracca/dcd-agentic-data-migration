@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Deterministic Synthetic Dataset Generator for the QuickBite Snowflake -> GCP Migration Demo.
+Deterministic Synthetic Dataset Generator for the UrbanFork Snowflake -> GCP Migration Demo.
 Uses 100% Python Standard Library (zero external dependencies) for instant execution.
 
 Generates 12 tables (~610k rows total) into data-generator/output/:
@@ -191,7 +191,7 @@ def generate_all() -> dict:
     abuser_ids: set[str] = set()
     with gzip.open(OUTPUT_DIR / "cust_user_mstr.csv.gz", "wt", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
-        w.writerow(["USR_ID", "F_NM", "L_NM", "EMAIL_TXT", "PHONE_TXT", "SIGNUP_DT", "HOME_ZONE_ID", "QB_PASS_FLG"])
+        w.writerow(["USR_ID", "F_NM", "L_NM", "EMAIL_TXT", "PHONE_TXT", "SIGNUP_DT", "HOME_ZONE_ID", "UF_PASS_FLG"])
         for i in range(1, 30001):
             uid = f"USR-{i:06d}"
             fn = first_names[i % len(first_names)]
@@ -200,12 +200,12 @@ def generate_all() -> dict:
             phone = f"+1-555-{rng.randint(200, 999):03d}-{rng.randint(1000, 9999):04d}"
             s_dt = dt.date(2023, 1, 1) + dt.timedelta(days=rng.randint(0, 800))
             z = zones[i % len(zones)]
-            qb_pass = 1 if (i <= 45 or rng.random() < 0.38) else 0
+            uf_pass = 1 if (i <= 45 or rng.random() < 0.38) else 0
             is_abuser = i <= 45
             if is_abuser:
                 abuser_ids.add(uid)
-            users.append({"usr_id": uid, "zone_id": z["zone_id"], "qb_pass": qb_pass, "is_abuser": is_abuser})
-            w.writerow([uid, fn, ln, email, phone, s_dt.isoformat(), z["zone_id"], qb_pass])
+            users.append({"usr_id": uid, "zone_id": z["zone_id"], "uf_pass": uf_pass, "is_abuser": is_abuser})
+            w.writerow([uid, fn, ln, email, phone, s_dt.isoformat(), z["zone_id"], uf_pass])
     row_counts["OPS_RAW.CUST_USER_MSTR"] = len(users)
 
     # ==========================================================================
@@ -355,7 +355,7 @@ def generate_all() -> dict:
             w_ln.writerow([f"LN-{ord_ln_cnt:08d}", oid, sku, inm, qty, f"{uprc:.2f}"])
             gmv += uprc * qty
 
-        dlv_fee = Decimal("0.00") if u["qb_pass"] == 1 else Decimal("3.99")
+        dlv_fee = Decimal("0.00") if u["uf_pass"] == 1 else Decimal("3.99")
         srv_fee = d2(gmv * Decimal("0.08"))
         tip_usd = d2(rng.choice([0, 2, 3, 4, 5, 6])) if ord_sts == "D" else Decimal("0.00")
         crr_pay = Decimal("5.25") if ord_sts == "D" else Decimal("0.00")

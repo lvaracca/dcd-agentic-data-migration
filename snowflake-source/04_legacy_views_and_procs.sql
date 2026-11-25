@@ -1,14 +1,14 @@
 -- =============================================================================
--- QuickBite Snowflake Source Setup — Step 4: Legacy Business Views & Scripting
+-- UrbanFork Snowflake Source Setup — Step 4: Legacy Business Views & Scripting
 -- CRITICAL DEMO ASSET:
--- All core QuickBite business rules ("Golden Math") are hardcoded inside these
+-- All core UrbanFork business rules ("Golden Math") are hardcoded inside these
 -- Snowflake SQL objects rather than documented in a catalog! Antigravity
 -- translates them to Dataform AND extracts their business semantics into OKF
 -- and Knowledge Catalog.
 -- =============================================================================
 USE ROLE ACCOUNTADMIN;
-USE WAREHOUSE QB_TRANSFORM_WH;
-USE DATABASE QUICKBITE_PROD;
+USE WAREHOUSE UF_TRANSFORM_WH;
+USE DATABASE URBANFORK_PROD;
 
 -- -----------------------------------------------------------------------------
 -- View 1: Platform Net Revenue (Net Take) & Effective Take-Rate %

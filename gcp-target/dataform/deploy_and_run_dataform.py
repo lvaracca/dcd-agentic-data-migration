@@ -102,7 +102,7 @@ def main() -> None:
     load_dotenv(ROOT_DIR / ".env")
     project_id = os.environ["GCP_PROJECT_ID"]
     region = os.environ.get("GCP_REGION", "us-central1")
-    repo_id = "quickbite-lakehouse-dag"
+    repo_id = "urbanfork-lakehouse-dag"
     ws_id = "dev-antigravity"
 
     exec_sa = ensure_dataform_iam(project_id)
@@ -116,7 +116,7 @@ def main() -> None:
         df_api("GET", f"{base}/repositories/{repo_id}", token, project_id=project_id)
         print(f"[1/5] Dataform repository '{repo_id}' already exists.")
     except RuntimeError:
-        df_api("POST", f"{base}/repositories?repositoryId={repo_id}", token, {"displayName": "QuickBite Lakehouse DAG"}, project_id=project_id)
+        df_api("POST", f"{base}/repositories?repositoryId={repo_id}", token, {"displayName": "UrbanFork Lakehouse DAG"}, project_id=project_id)
         print(f"[1/5] Created Dataform repository '{repo_id}' in {region}.")
 
     # 2. Create workspace if missing

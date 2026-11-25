@@ -3,7 +3,7 @@
 Programmatic Airbyte OSS Controller (Runs over IAP SSH against quickbite-airbyte-vm).
 Automates:
   1. `setup-legacy-snowflake`: Configures Source (PostgreSQL OLTP) -> Destination
-     (Snowflake QUICKBITE_PROD) + Incremental Connection, and runs initial sync!
+     (Snowflake URBANFORK_PROD) + Incremental Connection, and runs initial sync!
   2. `cutover-to-bigquery`: Seamlessly creates the Google BigQuery destination
      (using GCE Service Account ADC — zero JSON keys!) and switches the active
      incremental pipeline from Snowflake to BigQuery!
@@ -58,25 +58,25 @@ def api(method: str, path: str, body: dict | None = None, token: str | None = No
 tok = api("POST", "/applications/token", {"client_id": client_id, "client_secret": client_secret})["access_token"]
 ws_id = api("GET", "/workspaces", token=tok)["data"][0]["workspaceId"]
 
-# Get VM internal IP so Airbyte kind pods reach quickbite-oltp-postgres on 5439
+# Get VM internal IP so Airbyte kind pods reach urbanfork-oltp-postgres on 5439
 vm_ip = subprocess.check_output(["hostname", "-I"], text=True).split()[0]
 
 def get_or_create_pg_source() -> str:
     existing = api("GET", f"/sources?workspaceIds={ws_id}", token=tok).get("data", [])
     for s in existing:
-        if s.get("name") == "QuickBite OLTP Production (PostgreSQL)":
+        if s.get("name") == "UrbanFork OLTP Production (PostgreSQL)":
             return s["sourceId"]
     created = api("POST", "/sources", {
-        "name": "QuickBite OLTP Production (PostgreSQL)",
+        "name": "UrbanFork OLTP Production (PostgreSQL)",
         "workspaceId": ws_id,
         "configuration": {
             "sourceType": "postgres",
             "host": vm_ip,
             "port": 5439,
-            "database": "quickbite_oltp",
+            "database": "urbanfork_oltp",
             "schemas": ["oltp"],
-            "username": "qb_airbyte_user",
-            "password": "qb_demo_password",
+            "username": "uf_airbyte_user",
+            "password": "uf_demo_password",
             "ssl_mode": {"mode": "disable"},
             "tunnel_method": {"tunnel_method": "NO_TUNNEL"},
             "replication_method": {"method": "Standard"}
@@ -87,17 +87,17 @@ def get_or_create_pg_source() -> str:
 def get_or_create_sf_dest() -> str:
     existing = api("GET", f"/destinations?workspaceIds={ws_id}", token=tok).get("data", [])
     for d in existing:
-        if d.get("name") == "Snowflake - QUICKBITE_PROD (Legacy)":
+        if d.get("name") == "Snowflake - URBANFORK_PROD (Legacy)":
             return d["destinationId"]
     created = api("POST", "/destinations", {
-        "name": "Snowflake - QUICKBITE_PROD (Legacy)",
+        "name": "Snowflake - URBANFORK_PROD (Legacy)",
         "workspaceId": ws_id,
         "configuration": {
             "destinationType": "snowflake",
             "host": f"{cfg['sf_account']}.snowflakecomputing.com",
             "role": "ACCOUNTADMIN",
-            "warehouse": "QB_LOAD_WH",
-            "database": "QUICKBITE_PROD",
+            "warehouse": "UF_LOAD_WH",
+            "database": "URBANFORK_PROD",
             "schema": "OPS_RAW",
             "username": cfg["sf_user"],
             "credentials": {
@@ -111,10 +111,10 @@ def get_or_create_sf_dest() -> str:
 def get_or_create_bq_dest() -> str:
     existing = api("GET", f"/destinations?workspaceIds={ws_id}", token=tok).get("data", [])
     for d in existing:
-        if d.get("name") == "Google BigQuery - QuickBite Lakehouse":
+        if d.get("name") == "Google BigQuery - UrbanFork Lakehouse":
             return d["destinationId"]
     created = api("POST", "/destinations", {
-        "name": "Google BigQuery - QuickBite Lakehouse",
+        "name": "Google BigQuery - UrbanFork Lakehouse",
         "workspaceId": ws_id,
         "configuration": {
             "destinationType": "bigquery",
@@ -148,12 +148,12 @@ if action == "setup-legacy-snowflake":
     conns = api("GET", f"/connections?workspaceIds={ws_id}", token=tok).get("data", [])
     sf_conn_id = None
     for c in conns:
-        if c.get("name") == "QuickBite OLTP -> Snowflake (Legacy)":
+        if c.get("name") == "UrbanFork OLTP -> Snowflake (Legacy)":
             sf_conn_id = c["connectionId"]
             break
     if not sf_conn_id:
         c_res = api("POST", "/connections", {
-            "name": "QuickBite OLTP -> Snowflake (Legacy)",
+            "name": "UrbanFork OLTP -> Snowflake (Legacy)",
             "sourceId": src_id,
             "destinationId": sf_dst_id,
             "namespaceDefinition": "destination",
@@ -172,14 +172,14 @@ elif action == "cutover-to-bigquery":
     conns = api("GET", f"/connections?workspaceIds={ws_id}", token=tok).get("data", [])
     bq_conn_id = None
     for c in conns:
-        if c.get("name") == "QuickBite OLTP -> Snowflake (Legacy)" and c.get("status") == "active":
+        if c.get("name") == "UrbanFork OLTP -> Snowflake (Legacy)" and c.get("status") == "active":
             api("PATCH", f"/connections/{c['connectionId']}", {"status": "inactive"}, token=tok)
-        if c.get("name") == "QuickBite OLTP -> BigQuery (Live Cutover)":
+        if c.get("name") == "UrbanFork OLTP -> BigQuery (Live Cutover)":
             bq_conn_id = c["connectionId"]
             api("PATCH", f"/connections/{bq_conn_id}", {"status": "active"}, token=tok)
     if not bq_conn_id:
         c_res = api("POST", "/connections", {
-            "name": "QuickBite OLTP -> BigQuery (Live Cutover)",
+            "name": "UrbanFork OLTP -> BigQuery (Live Cutover)",
             "sourceId": src_id,
             "destinationId": bq_dst_id,
             "namespaceDefinition": "destination",
@@ -222,7 +222,7 @@ def main() -> None:
         "sf_password": os.environ["SNOWFLAKE_PASSWORD"],
         "gcp_project_id": project_id,
         "gcp_region": region,
-        "bq_raw_dataset": os.environ.get("BQ_RAW_DATASET", "quickbite_raw_ops"),
+        "bq_raw_dataset": os.environ.get("BQ_RAW_DATASET", "urbanfork_raw_ops"),
     }
 
     b64_script = base64.b64encode(REMOTE_WORKER_SCRIPT.encode()).decode()

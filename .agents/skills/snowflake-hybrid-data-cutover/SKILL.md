@@ -1,7 +1,7 @@
 ---
 name: snowflake-hybrid-data-cutover
 description: >-
-  Executes the Act 2 hybrid data migration from Snowflake QUICKBITE_PROD to
+  Executes the Act 2 hybrid data migration from Snowflake URBANFORK_PROD to
   Google BigQuery (Zero-Copy BigLake Iceberg mount for the 4 GCS Iceberg tables
   + Parquet/NDJSON unload for the 8 Native FDN/VARIANT tables + BigQuery RLS &
   Policy Tags) and seamlessly switches the Airbyte Terraform destination from
@@ -19,8 +19,8 @@ description: >-
    .venv/bin/python .agents/skills/snowflake-hybrid-data-cutover/scripts/migrate_hybrid_tables_to_bq.py
    ```
    What this script automates:
-   - Queries Snowflake `SYSTEM$GET_ICEBERG_TABLE_INFORMATION(...)` for `DLV_ORD_HDR`, `DLV_ORD_ITEM_LN`, `ZNE_FLEET_SNAP`, and `MRC_PAYOUT_LEDGER`, mounts them **Zero-Copy** as BigLake Iceberg tables (`*_iceberg_ext`) in `quickbite_raw_ops` (< 3 seconds), and creates partitioned/clustered BigQuery operational tables ready to accept live incremental Airbyte writes!
-   - Unloads the 8 Native Snowflake FDN tables (`COPY INTO @OPS_RAW.GCS_EXPORT_STAGE/...`) to GCS and loads them into `quickbite_raw_ops` and `quickbite_raw_iot` (landing `APP_DELIVERY_PINGS.PAYLOAD` into BigQuery's native **`JSON`** column!).
+   - Queries Snowflake `SYSTEM$GET_ICEBERG_TABLE_INFORMATION(...)` for `DLV_ORD_HDR`, `DLV_ORD_ITEM_LN`, `ZNE_FLEET_SNAP`, and `MRC_PAYOUT_LEDGER`, mounts them **Zero-Copy** as BigLake Iceberg tables (`*_iceberg_ext`) in `urbanfork_raw_ops` (< 3 seconds), and creates partitioned/clustered BigQuery operational tables ready to accept live incremental Airbyte writes!
+   - Unloads the 8 Native Snowflake FDN tables (`COPY INTO @OPS_RAW.GCS_EXPORT_STAGE/...`) to GCS and loads them into `urbanfork_raw_ops` and `urbanfork_raw_iot` (landing `APP_DELIVERY_PINGS.PAYLOAD` into BigQuery's native **`JSON`** column!).
    - Creates `gcp-target/security/bigquery_rls_and_masking.sql` and applies the regional Row Access Policy on `GEO_ZONE_LKP`.
 
 2. **Start Background Knowledge Catalog Data Profile Scans Early**:

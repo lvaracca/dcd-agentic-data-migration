@@ -9,7 +9,7 @@ WITH flattened_flags AS (
   SELECT
     p.ORD_ID,
     STRING_AGG(DISTINCT flag, ',' ORDER BY flag) AS ANOMALY_FLAGS_CSV
-  FROM ${ref("quickbite_raw_iot", "APP_DELIVERY_PINGS")} p,
+  FROM ${ref("urbanfork_raw_iot", "APP_DELIVERY_PINGS")} p,
   UNNEST(JSON_VALUE_ARRAY(p.PAYLOAD.anomaly_flags)) AS flag
   WHERE LAX_STRING(p.PAYLOAD.app_ver) != '3.8.0-beta'
   GROUP BY p.ORD_ID
@@ -19,7 +19,7 @@ asof_disputes AS (
     lp.ORD_ID,
     d.DSP_ID
   FROM ${ref("STG_CLEAN_DELIVERY_PINGS")} lp
-  JOIN ${ref("quickbite_raw_ops", "DSP_REFUND_FCT")} d
+  JOIN ${ref("urbanfork_raw_ops", "DSP_REFUND_FCT")} d
     ON lp.ORD_ID = d.ORD_ID
    AND lp.DELIVERED_PING_TS <= TIMESTAMP(d.DSP_TS)
   QUALIFY ROW_NUMBER() OVER (PARTITION BY lp.ORD_ID ORDER BY d.DSP_TS ASC) = 1
@@ -43,8 +43,8 @@ SELECT
   ) AS SLA_BREACH_RATE,
   COUNT(DISTINCT ad.DSP_ID) AS POST_DELIVERY_DISPUTE_CNT,
   COUNTIF(ff.ANOMALY_FLAGS_CSV LIKE '%SLA_EXCEEDED%') AS TELEMETRY_FLAGGED_SLA_CNT
-FROM ${ref("quickbite_raw_ops", "DLV_ORD_HDR")} h
-JOIN ${ref("quickbite_raw_ops", "GEO_ZONE_LKP")} z
+FROM ${ref("urbanfork_raw_ops", "DLV_ORD_HDR")} h
+JOIN ${ref("urbanfork_raw_ops", "GEO_ZONE_LKP")} z
   ON h.ZONE_ID = z.ZONE_ID
 JOIN ${ref("STG_CLEAN_DELIVERY_PINGS")} lp
   ON h.ORD_ID = lp.ORD_ID

@@ -1,5 +1,5 @@
 """
-QuickBite Legacy Snowpark Python Workload: User Refund-Abuse & Fraud Risk Scoring
+UrbanFork Legacy Snowpark Python Workload: User Refund-Abuse & Fraud Risk Scoring
 ---------------------------------------------------------------------------------
 Migrated by Antigravity during Act 3 to:
   -> Google Cloud Managed Spark (Dataproc Serverless) via ManagedSparkSession
@@ -47,11 +47,11 @@ def run_snowpark_scoring(session: Session) -> None:
         replace=True,
     )
 
-    orders_df = session.table("QUICKBITE_PROD.OPS_RAW.DLV_ORD_HDR").filter(
+    orders_df = session.table("URBANFORK_PROD.OPS_RAW.DLV_ORD_HDR").filter(
         F.col("ORD_STS_CD") == F.lit("D")
     )
-    disputes_df = session.table("QUICKBITE_PROD.OPS_RAW.DSP_REFUND_FCT")
-    users_df = session.table("QUICKBITE_PROD.OPS_RAW.CUST_USER_MSTR")
+    disputes_df = session.table("URBANFORK_PROD.OPS_RAW.DSP_REFUND_FCT")
+    users_df = session.table("URBANFORK_PROD.OPS_RAW.CUST_USER_MSTR")
 
     ord_joined = orders_df.join(disputes_df, on="ORD_ID", how="left")
 
@@ -77,7 +77,7 @@ def run_snowpark_scoring(session: Session) -> None:
 
     scored_df = (
         user_metrics.join(
-            users_df.select("USR_ID", "HOME_ZONE_ID", "QB_PASS_FLG"),
+            users_df.select("USR_ID", "HOME_ZONE_ID", "UF_PASS_FLG"),
             on="USR_ID",
             how="inner",
         )
@@ -100,7 +100,7 @@ def run_snowpark_scoring(session: Session) -> None:
         )
     )
 
-    scored_df.write.mode("overwrite").save_as_table("QUICKBITE_PROD.MART.USER_FRAUD_RISK_SCORES")
+    scored_df.write.mode("overwrite").save_as_table("URBANFORK_PROD.MART.USER_FRAUD_RISK_SCORES")
 
 
 if __name__ == "__main__":
@@ -109,13 +109,13 @@ if __name__ == "__main__":
         "user": os.environ["SNOWFLAKE_USER"],
         "password": os.environ["SNOWFLAKE_PASSWORD"],
         "role": os.environ.get("SNOWFLAKE_ROLE", "ACCOUNTADMIN"),
-        "warehouse": os.environ.get("SNOWFLAKE_WAREHOUSE", "QB_TRANSFORM_WH"),
-        "database": os.environ.get("SNOWFLAKE_DATABASE", "QUICKBITE_PROD"),
+        "warehouse": os.environ.get("SNOWFLAKE_WAREHOUSE", "UF_TRANSFORM_WH"),
+        "database": os.environ.get("SNOWFLAKE_DATABASE", "URBANFORK_PROD"),
         "schema": "MART",
     }
     sf_session = Session.builder.configs(conn_params).create()
     try:
         run_snowpark_scoring(sf_session)
-        print("Successfully materialized QUICKBITE_PROD.MART.USER_FRAUD_RISK_SCORES via Snowpark!")
+        print("Successfully materialized URBANFORK_PROD.MART.USER_FRAUD_RISK_SCORES via Snowpark!")
     finally:
         sf_session.close()

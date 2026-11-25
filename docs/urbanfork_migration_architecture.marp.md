@@ -3,7 +3,7 @@ marp: true
 theme: default
 size: 16:9
 paginate: true
-header: "QuickBite — Migration Snowflake vers Google Cloud"
+header: "UrbanFork — Migration Snowflake vers Google Cloud"
 footer: "Architecture, Objectifs KPI & Données Synthétiques | Antigravity Demo"
 style: |
   section {
@@ -160,13 +160,13 @@ style: |
 <!-- _class: lead -->
 <!-- _paginate: false -->
 
-# QuickBite : Migration Snowflake vers Google Cloud
+# UrbanFork : Migration Snowflake vers Google Cloud
 
 ## Remplacer le cœur analytique sans disruption et sacraliser les KPIs métier avec Antigravity
 
 <br>
 
-- **Scénario** : Plateforme de livraison repas & courses à la demande (*QuickBite*)
+- **Scénario** : Plateforme de livraison repas & courses à la demande (*UrbanFork*)
 - **Périmètre Live** : `Airbyte -> Snowflake (Iceberg + FDN + Tasks) -> Power BI` basculé vers `BigLake + BigQuery + Dataform + Spark + BQ AI + Knowledge Catalog`
 - **Format de la démonstration** : 45 minutes, 100 % exécuté en direct sur GCP (`us-central1`)
 
@@ -207,7 +207,7 @@ Une migration d'entrepôt de données ne se résume jamais à déplacer des tabl
   <text x="112" y="146" text-anchor="middle" font-size="14" font-weight="700" fill="#202124">AMONT (VM Privée GCE)</text>
   <rect x="26" y="165" width="173" height="62" rx="8" fill="#ffffff" stroke="#1a73e8" stroke-width="1.5"/>
   <text x="112" y="191" text-anchor="middle" font-size="13" font-weight="700" fill="#174ea6">PostgreSQL OLTP</text>
-  <text x="112" y="211" text-anchor="middle" font-size="11.5" fill="#5f6368">quickbite_oltp (:5439)</text>
+  <text x="112" y="211" text-anchor="middle" font-size="11.5" fill="#5f6368">urbanfork_oltp (:5439)</text>
   <line x1="112" y1="227" x2="112" y2="255" stroke="#5f6368" stroke-width="2"/>
   <polygon points="107,252 117,252 112,262" fill="#5f6368"/>
   <rect x="26" y="264" width="173" height="70" rx="8" fill="#e8f0fe" stroke="#1a73e8" stroke-width="2"/>
@@ -217,7 +217,7 @@ Une migration d'entrepôt de données ne se résume jamais à déplacer des tabl
 
   <!-- Legacy Snowflake -->
   <rect x="275" y="15" width="560" height="165" rx="12" fill="#fce8e6" stroke="#c5221f" stroke-width="1.5" stroke-dasharray="6,4"/>
-  <text x="295" y="39" font-size="13.5" font-weight="700" fill="#a50e0e">AVANT — Legacy Snowflake (QUICKBITE_PROD • GCP us-central1)</text>
+  <text x="295" y="39" font-size="13.5" font-weight="700" fill="#a50e0e">AVANT — Legacy Snowflake (URBANFORK_PROD • GCP us-central1)</text>
   <rect x="292" y="54" width="165" height="108" rx="8" fill="#ffffff" stroke="#d93025"/>
   <text x="374" y="77" text-anchor="middle" font-size="12.5" font-weight="700" fill="#202124">OPS_RAW &amp; IOT_RAW</text>
   <text x="374" y="98" text-anchor="middle" font-size="11" fill="#5f6368">4 Tables Iceberg (GCS)</text>
@@ -255,7 +255,7 @@ Une migration d'entrepôt de données ne se résume jamais à déplacer des tabl
   <text x="565" y="330" text-anchor="middle" font-size="11" fill="#5f6368">BigQuery AI (Gemini/TimesFM)</text>
 
   <rect x="674" y="250" width="146" height="110" rx="8" fill="#ffffff" stroke="#137333"/>
-  <text x="747" y="273" text-anchor="middle" font-size="12.5" font-weight="700" fill="#202124">quickbite_gold_mart</text>
+  <text x="747" y="273" text-anchor="middle" font-size="12.5" font-weight="700" fill="#202124">urbanfork_gold_mart</text>
   <text x="747" y="294" text-anchor="middle" font-size="10.5" fill="#137333" font-weight="600">Contrat 100 % identique</text>
   <text x="747" y="312" text-anchor="middle" font-size="10.5" fill="#5f6368">Colonnes MAJUSCULES</text>
   <text x="747" y="330" text-anchor="middle" font-size="10.5" fill="#5f6368">Parité vérifiée au centime</text>
@@ -307,15 +307,15 @@ Tout l'environnement est déployé en **`us-central1`** (co-localisation Snowfla
 ### Ingestion Sécurisée (Option A)
 - **VM GCE privée** `quickbite-airbyte-vm` (`e2-standard-4`, Shielded VM, **aucune IP publique**).
 - Sortie Internet via **Cloud Router + Cloud NAT**, accès admin/UI uniquement via **tunnel IAP** (`localhost:8000`).
-- **PostgreSQL OLTP** (`quickbite-oltp-postgres`) + **Airbyte OSS v2.5** (`abctl` / `kind`).
+- **PostgreSQL OLTP** (`urbanfork-oltp-postgres`) + **Airbyte OSS v2.5** (`abctl` / `kind`).
 - **Zéro clé JSON** : Airbyte écrit dans BigQuery via l'**ADC natif** du Service Account `quickbite-airbyte-sa`.
 
 </div>
 <div class="card">
 
 ### Stockage Hybride & Gouvernance
-- **Bucket Lakehouse** `gs://dcd-migration-demo-quickbite-lakehouse` hébergeant les fichiers Parquet/Metadata des **4 tables Apache Iceberg** écrites par Snowflake.
-- **Connexion BigLake** (`biglake-iceberg-conn`) permettant le montage *Zero-Copy* immédiat dans `quickbite_raw_ops`.
+- **Bucket Lakehouse** `gs://dcd-migration-demo-urbanfork-lakehouse` hébergeant les fichiers Parquet/Metadata des **4 tables Apache Iceberg** écrites par Snowflake.
+- **Connexion BigLake** (`biglake-iceberg-conn`) permettant le montage *Zero-Copy* immédiat dans `urbanfork_raw_ops`.
 - **Sécurité équivalente** :
   - Snowflake *Dynamic Masking* -> BigQuery **Policy Tags (CLS)**.
   - Snowflake *Row Access Policy* (`REG_CD`) -> BigQuery **Row Access Policy**.
@@ -457,7 +457,7 @@ Antigravity lit **toute la codebase legacy** pour extraire chaque règle métier
 
 Chaque KPI critique est figé dans un contrat de test automatisé (`evals/verify_migration_parity.py`) qui exige une **parité exacte au centime** avant validation de la bascule.
 
-| KPI Officiel QuickBite | Formule / Règle Sacralisée | Vérité Terrain (`seed = 42`) | Source Principale |
+| KPI Officiel UrbanFork | Formule / Règle Sacralisée | Vérité Terrain (`seed = 42`) | Source Principale |
 | :--- | :--- | :--- | :--- |
 | **Platform Net Revenue** *(Q3 2025 Restaurants)* | Commission SCD2 + Frais livraison/service − Paie coursier − Promos − Remboursements approuvés *(hors pourboires !)* | **153 150,49 USD** | `FCT_PLATFORM_NET_REVENUE` |
 | **FY25 Net Revenue** *(Exercice fiscal : 1er fév.)* | Somme sur `FISC_YR_N = 2025` séparée par vertical (`VERT_CD = 1` Resto vs `2` Grocery) | **937 401,38 USD** *(Resto)*<br>**38 309,66 USD** *(Grocery)* | `FCT_PLATFORM_NET_REVENUE` |
@@ -469,7 +469,7 @@ Chaque KPI critique est figé dans un contrat de test automatisé (`evals/verify
 
 # 8. Les Données Générées : Vue d'Ensemble (624 924 lignes)
 
-Un générateur Python déterministe (`data-generator/generate_quickbite_data.py`, **`seed = 42`**) produit un écosystème réaliste et reproductible couvrant **3 ans d'historique** jusqu'au **`2026-03-31`** (+50 commandes live du `2026-04-01` côté PostgreSQL OLTP).
+Un générateur Python déterministe (`data-generator/generate_urbanfork_data.py`, **`seed = 42`**) produit un écosystème réaliste et reproductible couvrant **3 ans d'historique** jusqu'au **`2026-03-31`** (+50 commandes live du `2026-04-01` côté PostgreSQL OLTP).
 
 <div class="cols-3">
 <div class="card-blue">
@@ -498,7 +498,7 @@ Un générateur Python déterministe (`data-generator/generate_quickbite_data.py
 
 # 9. Catalogue Détaillé des 12 Tables Sources
 
-| # | Table Snowflake (`QUICKBITE_PROD`) | Stockage | Lignes | Rôle & Spécificité Technique | Cible BigQuery |
+| # | Table Snowflake (`URBANFORK_PROD`) | Stockage | Lignes | Rôle & Spécificité Technique | Cible BigQuery |
 | :-: | :--- | :--- | --: | :--- | :--- |
 | 1 | `OPS_RAW.DLV_ORD_HDR` | <span class="badge b-ice">Iceberg</span> | 90 000 | En-têtes commandes + `STREAM` CDC | BigLake Iceberg + Airbyte `CDC_` |
 | 2 | `OPS_RAW.DLV_ORD_ITEM_LN` | <span class="badge b-ice">Iceberg</span> | 277 146 | Lignes paniers (calcul GMV) | BigLake Iceberg + Airbyte `CDC_` |
@@ -533,7 +533,7 @@ Pour démontrer la valeur réelle de **Dataform**, **OKF v0.2** et **Knowledge C
 
 | Temps | Acte | Action orchestrée par Antigravity | Preuve visible à l'écran |
 | :--- | :--- | :--- | :--- |
-| **00–05 min** | **Acte 1 : Audit Live** | Inspection complète de Snowflake (`QUICKBITE_PROD`), Airbyte, 7 Tasks et Power BI `.tmdl`. | Blueprint `MIGRATION_AUDIT_REPORT.md` + Snowsight Task Graph. |
+| **00–05 min** | **Acte 1 : Audit Live** | Inspection complète de Snowflake (`URBANFORK_PROD`), Airbyte, 7 Tasks et Power BI `.tmdl`. | Blueprint `MIGRATION_AUDIT_REPORT.md` + Snowsight Task Graph. |
 | **05–13 min** | **Acte 2 : Données & Airbyte** | Montage **Zero-Copy BigLake** (4 Iceberg) + chargement 8 FDN/`JSON` + bascule **Airbyte -> BigQuery** + 50 commandes live. | `624 924` lignes migrées + 50 commandes du 1er avril atterrissent dans BigQuery via Airbyte UI. |
 | **13–26 min** | **Acte 3 : Dataform, Spark & AI** | Conversion du 7-Node Task Graph en **DAG Dataform** + **Managed Spark** + **BigQuery AI** (`AI.CLASSIFY`, TimesFM `AI.FORECAST`). | Graphe compilé Dataform vs Snowsight + **`153 150,49 == 153 150,49`** dans `verify_migration_parity.py`. |
 | **26–37 min** | **Acte 4 : KPIs -> OKF & KC** | Extraction des règles SQL + Python + DAX -> **OKF v0.2** -> métadonnées BigQuery, **Knowledge Catalog** & `QUERY_HISTORY`. | Schémas BigQuery documentés + onglet **Insights** (jointures d'usage) + Glossary / Context Set. |

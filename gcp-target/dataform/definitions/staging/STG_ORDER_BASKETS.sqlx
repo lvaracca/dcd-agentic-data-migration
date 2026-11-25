@@ -18,7 +18,7 @@ WITH basket AS (
     ORD_ID,
     SUM(CAST(QTY_N AS NUMERIC) * CAST(UNIT_PRC_USD AS NUMERIC)) AS GMV_USD,
     SUM(QTY_N) AS TOTAL_ITEMS_N
-  FROM ${ref("quickbite_raw_ops", "DLV_ORD_ITEM_LN")}
+  FROM ${ref("urbanfork_raw_ops", "DLV_ORD_ITEM_LN")}
   GROUP BY ORD_ID
 )
 SELECT
@@ -39,6 +39,6 @@ SELECT
   CAST(h.TIP_USD AS NUMERIC) AS TIP_USD,
   CAST(h.CRR_PAY_USD AS NUMERIC) AS CRR_PAY_USD,
   CAST(h.PROMO_VOUCHER_USD AS NUMERIC) AS PROMO_VOUCHER_USD
-FROM ${ref("quickbite_raw_ops", "DLV_ORD_HDR")} h
+FROM ${ref("urbanfork_raw_ops", "DLV_ORD_HDR")} h
 LEFT JOIN basket b
   ON h.ORD_ID = b.ORD_ID

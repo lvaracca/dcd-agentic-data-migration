@@ -1,7 +1,7 @@
 ---
 name: repoint-powerbi-to-bigquery
 description: >-
-  Unplugs the QuickBite Power BI Project (.pbip / TMDL semantic model) from
+  Unplugs the UrbanFork Power BI Project (.pbip / TMDL semantic model) from
   Snowflake (Snowflake.Databases) and seamlessly re-points all M-query table
   partitions to Google BigQuery (GoogleBigQuery.Database with Storage API),
   validating 100% column and DAX measure compatibility. Use during Act 5.
@@ -12,8 +12,8 @@ description: >-
 ## Procedure
 
 1. **Update Connection Parameters (`expressions.tmdl` & `model.tmdl`)**:
-   In `bi-powerbi/QuickBite_Executive_Cockpit.SemanticModel/definition/expressions.tmdl` and `model.tmdl`:
-   - Replace `SnowflakeHost`, `SnowflakeWarehouse`, and `SnowflakeDatabase` with `GcpProjectId` (`"<GCP_PROJECT_ID>"` from `.env` / `agent-config.json`) and `BigQueryDataset` (`"quickbite_gold_mart"`).
+   In `bi-powerbi/UrbanFork_Executive_Cockpit.SemanticModel/definition/expressions.tmdl` and `model.tmdl`:
+   - Replace `SnowflakeHost`, `SnowflakeWarehouse`, and `SnowflakeDatabase` with `GcpProjectId` (`"<GCP_PROJECT_ID>"` from `.env` / `agent-config.json`) and `BigQueryDataset` (`"urbanfork_gold_mart"`).
 
 2. **Re-Point M-Query Partitions Across All 3 Gold Tables**:
    Update the `partition ... = m` block in each of:

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-QuickBite Managed Spark (Dataproc Serverless) Workload:
+UrbanFork Managed Spark (Dataproc Serverless) Workload:
 Migrated from Snowflake Snowpark Python (`snowpark_merchant_fraud_scoring.py`)
 ------------------------------------------------------------------------------
 Key Modernizations:
@@ -21,11 +21,11 @@ from pyspark.sql import functions as F
 
 def run_managed_spark_fraud_scoring(
     project_id: str,
-    raw_dataset: str = "quickbite_raw_ops",
-    mart_dataset: str = "quickbite_gold_mart",
+    raw_dataset: str = "urbanfork_raw_ops",
+    mart_dataset: str = "urbanfork_gold_mart",
 ) -> None:
     spark = (
-        SparkSession.builder.appName("QuickBite-ManagedSpark-FraudScoring")
+        SparkSession.builder.appName("UrbanFork-ManagedSpark-FraudScoring")
         .getOrCreate()
     )
 
@@ -101,7 +101,7 @@ def run_managed_spark_fraud_scoring(
 
         scored_df = (
             user_metrics.join(
-                users_df.select("USR_ID", "HOME_ZONE_ID", "QB_PASS_FLG"),
+                users_df.select("USR_ID", "HOME_ZONE_ID", "UF_PASS_FLG"),
                 on="USR_ID",
                 how="inner",
             )
@@ -134,6 +134,6 @@ def run_managed_spark_fraud_scoring(
 if __name__ == "__main__":
     run_managed_spark_fraud_scoring(
         project_id=os.getenv("GCP_PROJECT_ID", "dcd-migration-demo"),
-        raw_dataset=os.getenv("BQ_RAW_DATASET", "quickbite_raw_ops"),
-        mart_dataset=os.getenv("BQ_MART_DATASET", "quickbite_gold_mart"),
+        raw_dataset=os.getenv("BQ_RAW_DATASET", "urbanfork_raw_ops"),
+        mart_dataset=os.getenv("BQ_MART_DATASET", "urbanfork_gold_mart"),
     )

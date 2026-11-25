@@ -9,8 +9,8 @@
   },
   "pages": [
     {
-      "name": "QuickBiteExecOverview",
-      "displayName": "QuickBite Executive Cockpit",
+      "name": "UrbanForkExecOverview",
+      "displayName": "UrbanFork Executive Cockpit",
       "visuals": [
         { "visualType": "card", "measure": "FCT_PLATFORM_NET_REVENUE[Total GMV ($)]" },
         { "visualType": "card", "measure": "FCT_PLATFORM_NET_REVENUE[Platform Net Revenue ($)]" },

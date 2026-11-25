@@ -1,5 +1,5 @@
 -- =============================================================================
--- QuickBite Snowflake Source Setup — Step 7: Seed Realistic Analyst Query History
+-- UrbanFork Snowflake Source Setup — Step 7: Seed Realistic Analyst Query History
 -- Executed during setup so SNOWFLAKE.ACCOUNT_USAGE.QUERY_HISTORY (and
 -- INFORMATION_SCHEMA.QUERY_HISTORY()) captures real multi-table joins across
 -- SCD2 commissions, 'CBK-' string concatenations, Snapshot MAX(SNAP_TS), and
@@ -7,8 +7,8 @@
 -- power deterministic Usage-Based Joins in Knowledge Catalog Data Insights!
 -- =============================================================================
 USE ROLE ACCOUNTADMIN;
-USE WAREHOUSE QB_TRANSFORM_WH;
-USE DATABASE QUICKBITE_PROD;
+USE WAREHOUSE UF_TRANSFORM_WH;
+USE DATABASE URBANFORK_PROD;
 
 -- Query 1: Calendar Q3 2025 Restaurant Platform Net Revenue (SCD2 + Anti-Fanout)
 SELECT
@@ -84,7 +84,7 @@ LIMIT 10;
 
 -- Query 6: QuickPass Subscriber Retention & Courier Vehicle Performance
 SELECT
-    u.QB_PASS_FLG,
+    u.UF_PASS_FLG,
     c.VEH_TP_CD,
     COUNT(DISTINCT h.ORD_ID) AS DELIVERED_ORDERS,
     ROUND(AVG(TRY_TO_NUMBER(p.PAYLOAD:metrics.travel_sec::VARCHAR) / 60.0), 2) AS AVG_TRAVEL_MIN

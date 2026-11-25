@@ -16,13 +16,13 @@ variable "airbyte_workspace_id" {
 variable "postgres_host" {
   type        = string
   default     = "host.docker.internal"
-  description = "Hostname for quickbite-oltp-postgres reachable from Airbyte"
+  description = "Hostname for urbanfork-oltp-postgres reachable from Airbyte"
 }
 
 variable "postgres_password" {
   type      = string
   sensitive = true
-  default   = "qb_demo_password"
+  default   = "uf_demo_password"
 }
 
 variable "snowflake_account" {

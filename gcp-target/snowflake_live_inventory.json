@@ -6,7 +6,7 @@
       "TABLE_TYPE": "BASE TABLE",
       "IS_ICEBERG": "NO",
       "ROW_COUNT": 142285,
-      "BYTES": 3547648,
+      "BYTES": 3548672,
       "CLUSTERING_KEY": "LINEAR(TO_DATE(INGEST_TS))"
     },
     {
@@ -29,29 +29,11 @@
     },
     {
       "TABLE_SCHEMA": "MART",
-      "TABLE_NAME": "FCT_DAILY_REGION_DEMAND_TRAIN",
-      "TABLE_TYPE": "BASE TABLE",
-      "IS_ICEBERG": "NO",
-      "ROW_COUNT": 912,
-      "BYTES": 6656,
-      "CLUSTERING_KEY": null
-    },
-    {
-      "TABLE_SCHEMA": "MART",
       "TABLE_NAME": "FCT_PLATFORM_NET_REVENUE",
       "TABLE_TYPE": "BASE TABLE",
       "IS_ICEBERG": "NO",
       "ROW_COUNT": 30704,
-      "BYTES": 747520,
-      "CLUSTERING_KEY": null
-    },
-    {
-      "TABLE_SCHEMA": "MART",
-      "TABLE_NAME": "FCT_REGIONAL_ORDER_FORECAST_14D",
-      "TABLE_TYPE": "BASE TABLE",
-      "IS_ICEBERG": "NO",
-      "ROW_COUNT": 42,
-      "BYTES": 2560,
+      "BYTES": 746496,
       "CLUSTERING_KEY": null
     },
     {
@@ -69,7 +51,7 @@
       "TABLE_TYPE": "BASE TABLE",
       "IS_ICEBERG": "NO",
       "ROW_COUNT": 80937,
-      "BYTES": 1455616,
+      "BYTES": 1455104,
       "CLUSTERING_KEY": null
     },
     {
@@ -101,15 +83,6 @@
     },
     {
       "TABLE_SCHEMA": "MART",
-      "TABLE_NAME": "VW_DAILY_REGION_DEMAND_TRAIN",
-      "TABLE_TYPE": "VIEW",
-      "IS_ICEBERG": "NO",
-      "ROW_COUNT": null,
-      "BYTES": null,
-      "CLUSTERING_KEY": null
-    },
-    {
-      "TABLE_SCHEMA": "MART",
       "TABLE_NAME": "VW_DELIVERY_SLA_TELEMETRY",
       "TABLE_TYPE": "VIEW",
       "IS_ICEBERG": "NO",
@@ -133,33 +106,6 @@
       "IS_ICEBERG": "NO",
       "ROW_COUNT": null,
       "BYTES": null,
-      "CLUSTERING_KEY": null
-    },
-    {
-      "TABLE_SCHEMA": "OPS_RAW",
-      "TABLE_NAME": "CDC_DLV_ORD_HDR",
-      "TABLE_TYPE": "BASE TABLE",
-      "IS_ICEBERG": "NO",
-      "ROW_COUNT": 1,
-      "BYTES": 2048,
-      "CLUSTERING_KEY": null
-    },
-    {
-      "TABLE_SCHEMA": "OPS_RAW",
-      "TABLE_NAME": "CDC_DLV_ORD_ITEM_LN",
-      "TABLE_TYPE": "BASE TABLE",
-      "IS_ICEBERG": "NO",
-      "ROW_COUNT": 1,
-      "BYTES": 1536,
-      "CLUSTERING_KEY": null
-    },
-    {
-      "TABLE_SCHEMA": "OPS_RAW",
-      "TABLE_NAME": "CDC_DSP_REFUND_FCT",
-      "TABLE_TYPE": "BASE TABLE",
-      "IS_ICEBERG": "NO",
-      "ROW_COUNT": 0,
-      "BYTES": 0,
       "CLUSTERING_KEY": null
     },
     {
@@ -268,49 +214,49 @@
       "state": "suspended",
       "schedule": "USING CRON 0/15 * * * * UTC",
       "predecessors": "[]",
-      "warehouse": "QB_TRANSFORM_WH"
+      "warehouse": "UF_TRANSFORM_WH"
     },
     {
       "name": "TSK_01A_STAGE_ORDERS",
       "state": "started",
       "schedule": null,
-      "predecessors": "[\n  \"QUICKBITE_PROD.MART.TSK_00_ROOT_CDC_ROUTER\"\n]",
-      "warehouse": "QB_TRANSFORM_WH"
+      "predecessors": "[\n  \"URBANFORK_PROD.MART.TSK_00_ROOT_CDC_ROUTER\"\n]",
+      "warehouse": "UF_TRANSFORM_WH"
     },
     {
       "name": "TSK_01B_PARSE_PINGS",
       "state": "started",
       "schedule": null,
-      "predecessors": "[\n  \"QUICKBITE_PROD.MART.TSK_00_ROOT_CDC_ROUTER\"\n]",
-      "warehouse": "QB_TRANSFORM_WH"
+      "predecessors": "[\n  \"URBANFORK_PROD.MART.TSK_00_ROOT_CDC_ROUTER\"\n]",
+      "warehouse": "UF_TRANSFORM_WH"
     },
     {
       "name": "TSK_01C_STAGE_DISPUTES",
       "state": "started",
       "schedule": null,
-      "predecessors": "[\n  \"QUICKBITE_PROD.MART.TSK_00_ROOT_CDC_ROUTER\"\n]",
-      "warehouse": "QB_TRANSFORM_WH"
+      "predecessors": "[\n  \"URBANFORK_PROD.MART.TSK_00_ROOT_CDC_ROUTER\"\n]",
+      "warehouse": "UF_TRANSFORM_WH"
     },
     {
       "name": "TSK_02A_MART_NET_REVENUE",
       "state": "started",
       "schedule": null,
-      "predecessors": "[\n  \"QUICKBITE_PROD.MART.TSK_01A_STAGE_ORDERS\",\n  \"QUICKBITE_PROD.MART.TSK_01C_STAGE_DISPUTES\"\n]",
-      "warehouse": "QB_TRANSFORM_WH"
+      "predecessors": "[\n  \"URBANFORK_PROD.MART.TSK_01A_STAGE_ORDERS\",\n  \"URBANFORK_PROD.MART.TSK_01C_STAGE_DISPUTES\"\n]",
+      "warehouse": "UF_TRANSFORM_WH"
     },
     {
       "name": "TSK_02B_MART_PRIME_PARTNERS",
       "state": "started",
       "schedule": null,
-      "predecessors": "[\n  \"QUICKBITE_PROD.MART.TSK_01A_STAGE_ORDERS\",\n  \"QUICKBITE_PROD.MART.TSK_01B_PARSE_PINGS\",\n  \"QUICKBITE_PROD.MART.TSK_01C_STAGE_DISPUTES\"\n]",
-      "warehouse": "QB_TRANSFORM_WH"
+      "predecessors": "[\n  \"URBANFORK_PROD.MART.TSK_01A_STAGE_ORDERS\",\n  \"URBANFORK_PROD.MART.TSK_01B_PARSE_PINGS\",\n  \"URBANFORK_PROD.MART.TSK_01C_STAGE_DISPUTES\"\n]",
+      "warehouse": "UF_TRANSFORM_WH"
     },
     {
       "name": "TSK_03_REFRESH_PBI_AND_AUDIT",
       "state": "started",
       "schedule": null,
-      "predecessors": "[\n  \"QUICKBITE_PROD.MART.TSK_02A_MART_NET_REVENUE\",\n  \"QUICKBITE_PROD.MART.TSK_02B_MART_PRIME_PARTNERS\"\n]",
-      "warehouse": "QB_TRANSFORM_WH"
+      "predecessors": "[\n  \"URBANFORK_PROD.MART.TSK_02A_MART_NET_REVENUE\",\n  \"URBANFORK_PROD.MART.TSK_02B_MART_PRIME_PARTNERS\"\n]",
+      "warehouse": "UF_TRANSFORM_WH"
     }
   ],
   "streams": [

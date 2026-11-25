@@ -2,7 +2,7 @@
 """
 Automated Tableau Workbook (.twb XML) Cutover Helper:
 Re-points Snowflake datasource connections inside a Tableau `.twb` workbook
-to Google BigQuery (`dcd-migration-demo.quickbite_gold_mart`) while keeping
+to Google BigQuery (`dcd-migration-demo.urbanfork_gold_mart`) while keeping
 100% of Tableau Calculated Fields, column bindings, and dashboard layouts intact.
 """
 
@@ -54,7 +54,7 @@ def main() -> None:
         input_path=args.input,
         output_path=out,
         project_id=os.getenv("GCP_PROJECT_ID", "dcd-migration-demo"),
-        dataset=os.getenv("BQ_MART_DATASET", "quickbite_gold_mart"),
+        dataset=os.getenv("BQ_MART_DATASET", "urbanfork_gold_mart"),
     )
 
 

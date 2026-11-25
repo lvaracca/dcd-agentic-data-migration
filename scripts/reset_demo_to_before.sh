@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# QuickBite Demo — Reset Target GCP / Airbyte / Local Repo Back to "BEFORE" State
+# UrbanFork Demo — Reset Target GCP / Airbyte / Local Repo Back to "BEFORE" State
 # Run ONLY when you want to wipe the dry-run artifacts and start a fresh recording
-# from Act 1. (Never touches Snowflake QUICKBITE_PROD!)
+# from Act 1. (Never touches Snowflake URBANFORK_PROD!)
 # ==============================================================================
 set -euo pipefail
 
@@ -20,7 +20,7 @@ ZONE="${REGION}-a"
 
 echo "⚠️  This will reset BigQuery target datasets, Airbyte active connection (back to Snowflake),"
 echo "   PostgreSQL OLTP April 1st test orders, and local generated folders (gcp-target/, okf/, bundle/)."
-echo "   Snowflake QUICKBITE_PROD is NOT touched."
+echo "   Snowflake URBANFORK_PROD is NOT touched."
 read -r -p "Continue? [y/N] " confirm
 if [[ ! "${confirm}" =~ ^[Yy]$ ]]; then
   echo "Cancelled."
@@ -28,10 +28,10 @@ if [[ ! "${confirm}" =~ ^[Yy]$ ]]; then
 fi
 
 echo "=== 1/4 Cleaning BigQuery target datasets in ${PROJECT_ID} (${REGION}) ==="
-for ds in quickbite_raw_ops quickbite_raw_iot quickbite_gold_mart quickbite_gold_mart_assertions; do
+for ds in urbanfork_raw_ops urbanfork_raw_iot urbanfork_gold_mart urbanfork_gold_mart_assertions; do
   bq rm -r -f -d "${PROJECT_ID}:${ds}" >/dev/null 2>&1 || true
 done
-for ds in quickbite_raw_ops quickbite_raw_iot quickbite_gold_mart; do
+for ds in urbanfork_raw_ops urbanfork_raw_iot urbanfork_gold_mart; do
   bq mk --location="${REGION}" --label=datacloud:antigravity --dataset "${PROJECT_ID}:${ds}"
 done
 
@@ -40,7 +40,7 @@ gcloud compute ssh quickbite-airbyte-vm \
   --zone="${ZONE}" \
   --project="${PROJECT_ID}" \
   --tunnel-through-iap \
-  --command="sudo docker exec -i quickbite-oltp-postgres psql -U qb_airbyte_user -d quickbite_oltp -c \"DELETE FROM oltp.dlv_ord_item_ln WHERE ord_id > 'ORD-0090000'; DELETE FROM oltp.dlv_ord_hdr WHERE ord_id > 'ORD-0090000';\""
+  --command="sudo docker exec -i urbanfork-oltp-postgres psql -U uf_airbyte_user -d urbanfork_oltp -c \"DELETE FROM oltp.dlv_ord_item_ln WHERE ord_id > 'ORD-0090000'; DELETE FROM oltp.dlv_ord_hdr WHERE ord_id > 'ORD-0090000';\""
 
 echo "=== 3/4 Restoring Airbyte Active Connection back to Snowflake (Legacy) ==="
 .venv/bin/python - << 'PY'

@@ -1,11 +1,11 @@
 -- =============================================================================
--- QuickBite Snowflake Source Setup — Step 1: Hybrid DDL (4 Iceberg + 8 Native FDN)
+-- UrbanFork Snowflake Source Setup — Step 1: Hybrid DDL (4 Iceberg + 8 Native FDN)
 -- Intentionally omits verbose column comments on raw tables to simulate a real
 -- undocumented legacy marketplace database.
 -- =============================================================================
 USE ROLE ACCOUNTADMIN;
-USE WAREHOUSE QB_LOAD_WH;
-USE DATABASE QUICKBITE_PROD;
+USE WAREHOUSE UF_LOAD_WH;
+USE DATABASE URBANFORK_PROD;
 
 -- =============================================================================
 -- PART A: 4 HIGH-VOLUME OPERATIONAL TABLES AS APACHE ICEBERG ON GCS
@@ -29,7 +29,7 @@ CREATE OR REPLACE ICEBERG TABLE OPS_RAW.DLV_ORD_HDR (
     PROMO_VOUCHER_USD NUMBER(10, 2)
 )
     CATALOG = 'SNOWFLAKE'
-    EXTERNAL_VOLUME = 'QUICKBITE_GCS_ICEBERG_VOL'
+    EXTERNAL_VOLUME = 'URBANFORK_GCS_ICEBERG_VOL'
     BASE_LOCATION = 'ops_raw/dlv_ord_hdr';
 
 CREATE OR REPLACE ICEBERG TABLE OPS_RAW.DLV_ORD_ITEM_LN (
@@ -41,7 +41,7 @@ CREATE OR REPLACE ICEBERG TABLE OPS_RAW.DLV_ORD_ITEM_LN (
     UNIT_PRC_USD NUMBER(10, 2)
 )
     CATALOG = 'SNOWFLAKE'
-    EXTERNAL_VOLUME = 'QUICKBITE_GCS_ICEBERG_VOL'
+    EXTERNAL_VOLUME = 'URBANFORK_GCS_ICEBERG_VOL'
     BASE_LOCATION = 'ops_raw/dlv_ord_item_ln';
 
 CREATE OR REPLACE ICEBERG TABLE OPS_RAW.ZNE_FLEET_SNAP (
@@ -52,7 +52,7 @@ CREATE OR REPLACE ICEBERG TABLE OPS_RAW.ZNE_FLEET_SNAP (
     UNASSIGNED_ORD_N INT
 )
     CATALOG = 'SNOWFLAKE'
-    EXTERNAL_VOLUME = 'QUICKBITE_GCS_ICEBERG_VOL'
+    EXTERNAL_VOLUME = 'URBANFORK_GCS_ICEBERG_VOL'
     BASE_LOCATION = 'ops_raw/zne_fleet_snap';
 
 CREATE OR REPLACE ICEBERG TABLE OPS_RAW.MRC_PAYOUT_LEDGER (
@@ -65,7 +65,7 @@ CREATE OR REPLACE ICEBERG TABLE OPS_RAW.MRC_PAYOUT_LEDGER (
     PYT_STS_FLG INT
 )
     CATALOG = 'SNOWFLAKE'
-    EXTERNAL_VOLUME = 'QUICKBITE_GCS_ICEBERG_VOL'
+    EXTERNAL_VOLUME = 'URBANFORK_GCS_ICEBERG_VOL'
     BASE_LOCATION = 'ops_raw/mrc_payout_ledger';
 
 -- =============================================================================
@@ -117,7 +117,7 @@ CREATE OR REPLACE TABLE OPS_RAW.CUST_USER_MSTR (
     PHONE_TXT VARCHAR(40),
     SIGNUP_DT DATE,
     HOME_ZONE_ID VARCHAR(20),
-    QB_PASS_FLG NUMBER(1, 0)
+    UF_PASS_FLG NUMBER(1, 0)
 );
 
 CREATE OR REPLACE TABLE OPS_RAW.CRR_COURIER_MSTR (

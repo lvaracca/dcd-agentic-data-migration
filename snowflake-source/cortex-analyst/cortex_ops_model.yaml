@@ -8,13 +8,13 @@
 # Antigravity salvages these base definitions and merges them with the full
 # business logic extracted from SQL Views, Stored Procs & Snowpark into OKF v0.2.
 # ==============================================================================
-name: quickbite_basic_orders_pilot
-description: Initial incomplete semantic model for QuickBite delivery orders.
+name: urbanfork_basic_orders_pilot
+description: Initial incomplete semantic model for UrbanFork delivery orders.
 
 tables:
   - name: dlv_ord_hdr
     base_table:
-      database: QUICKBITE_PROD
+      database: URBANFORK_PROD
       schema: OPS_RAW
       table: DLV_ORD_HDR
     dimensions:
@@ -43,11 +43,11 @@ tables:
         expr: "IFF(ORD_STS_CD = 'D', TIP_USD, 0)"
         default_aggregation: sum
         data_type: NUMBER
-        description: "Pass-through courier tips. Must NEVER be included in QuickBite Platform Net Revenue."
+        description: "Pass-through courier tips. Must NEVER be included in UrbanFork Platform Net Revenue."
 
   - name: dlv_ord_item_ln
     base_table:
-      database: QUICKBITE_PROD
+      database: URBANFORK_PROD
       schema: OPS_RAW
       table: DLV_ORD_ITEM_LN
     measures:
@@ -60,7 +60,7 @@ tables:
 
   - name: geo_zone_lkp
     base_table:
-      database: QUICKBITE_PROD
+      database: URBANFORK_PROD
       schema: OPS_RAW
       table: GEO_ZONE_LKP
     dimensions:

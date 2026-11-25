@@ -1,5 +1,5 @@
 -- =============================================================================
--- QuickBite OLTP Source Schema (Synced Incrementally via Airbyte)
+-- UrbanFork OLTP Source Schema (Synced Incrementally via Airbyte)
 -- High-watermark cursor aligns with historical dataset cutoff (2026-03-31)
 -- =============================================================================
 CREATE SCHEMA IF NOT EXISTS oltp;

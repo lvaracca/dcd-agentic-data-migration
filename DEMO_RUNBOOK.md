@@ -1,16 +1,16 @@
 # Presenter Live Demo Runbook (45-Minute Choreography)
 
-Copy-paste prompts for **Antigravity** during your live presentation once your Snowflake Trial (`QUICKBITE_PROD`) and GCP prerequisites (`./scripts/01_setup_gcp_prereqs.sh`) are seeded.
+Copy-paste prompts for **Antigravity** during your live presentation once your Snowflake Trial (`URBANFORK_PROD`) and GCP prerequisites (`./scripts/01_setup_gcp_prereqs.sh`) are seeded.
 
 ---
 
 ## Act 1 (00:00 – 05:00) — Live Legacy Stack Tour & Automated Audit
 1. **Show briefly on screen**:
-   - **Snowsight UI**: Show `QUICKBITE_PROD` (`OPS_RAW` hybrid Iceberg + FDN tables, `IOT_RAW.APP_DELIVERY_PINGS` `VARIANT` JSON, and open **Monitoring -> Task Graph** to show the **7-Node Snowflake Task DAG**).
+   - **Snowsight UI**: Show `URBANFORK_PROD` (`OPS_RAW` hybrid Iceberg + FDN tables, `IOT_RAW.APP_DELIVERY_PINGS` `VARIANT` JSON, and open **Monitoring -> Task Graph** to show the **7-Node Snowflake Task DAG**).
    - **Airbyte / Power BI**: Show `ingestion-airbyte/airbyte_terraform/main.tf` pointing at Snowflake and `bi-powerbi/.../FCT_PLATFORM_NET_REVENUE.tmdl` using `Snowflake.Databases(...)`.
 2. **Prompt Antigravity**:
    ```text
-   Audit our live Snowflake QUICKBITE_PROD environment, upstream Airbyte Terraform pipeline, 7-node Snowflake Task DAG, and downstream Power BI (.pbip / TMDL) model. Generate the GCP migration blueprint in gcp-target/MIGRATION_AUDIT_REPORT.md.
+   Audit our live Snowflake URBANFORK_PROD environment, upstream Airbyte Terraform pipeline, 7-node Snowflake Task DAG, and downstream Power BI (.pbip / TMDL) model. Generate the GCP migration blueprint in gcp-target/MIGRATION_AUDIT_REPORT.md.
    ```
 
 ---

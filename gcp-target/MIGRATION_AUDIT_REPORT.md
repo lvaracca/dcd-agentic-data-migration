@@ -1,6 +1,6 @@
-# QuickBite Snowflake-to-GCP Migration Audit Report (Act 1)
+# UrbanFork Snowflake-to-GCP Migration Audit Report (Act 1)
 
-**Source Estate**: Snowflake Enterprise Trial (`QUICKBITE_PROD`, `us-central1`)
+**Source Estate**: Snowflake Enterprise Trial (`URBANFORK_PROD`, `us-central1`)
 **Target Platform**: Google Cloud (`dcd-migration-demo`, `us-central1`, BigQuery + BigLake + Dataform + Managed Spark + BigQuery AI + Knowledge Catalog)
 
 ---
@@ -14,7 +14,7 @@
 | `OPS_RAW.ZNE_FLEET_SNAP` | **Apache Iceberg (GCS)** | 60,372 | **Zero-Copy BigLake Iceberg** (`*_ICEBERG_EXT`) + Partitioned BQ Table | `PARTITION BY DATE(SNAP_TS)` / `CLUSTER BY ZONE_ID` |
 | `OPS_RAW.MRC_PAYOUT_LEDGER` | **Apache Iceberg (GCS)** | 13,746 | **Zero-Copy BigLake Iceberg** (`*_ICEBERG_EXT`) + Partitioned BQ Table | `PARTITION BY ISSUE_DT` / `CLUSTER BY PYT_STS_FLG, MRC_ID` |
 | `IOT_RAW.APP_DELIVERY_PINGS` | **Native FDN (`VARIANT`)** + Snowpipe | 142,285 | Unload NDJSON GZIP -> **BigQuery Native `JSON`** | `PARTITION BY DATE(INGEST_TS)` / `CLUSTER BY ORD_ID` |
-| `OPS_RAW.CUST_USER_MSTR` | Native FDN + `MSK_EMAIL_POLICY`, `MSK_PHONE_POLICY` | 30,000 | Parquet Unload -> BigQuery Native + **Policy Tags (CLS)** | `CLUSTER BY HOME_ZONE_ID, QB_PASS_FLG` |
+| `OPS_RAW.CUST_USER_MSTR` | Native FDN + `MSK_EMAIL_POLICY`, `MSK_PHONE_POLICY` | 30,000 | Parquet Unload -> BigQuery Native + **Policy Tags (CLS)** | `CLUSTER BY HOME_ZONE_ID, UF_PASS_FLG` |
 | `OPS_RAW.CRR_COURIER_MSTR` | Native FDN + `MSK_PHONE_POLICY` | 2,500 | Parquet Unload -> BigQuery Native + **Policy Tags (CLS)** | `CLUSTER BY HOME_ZONE_ID, VEH_TP_CD` |
 | `OPS_RAW.DSP_REFUND_FCT` | Native FDN + `STRM_DSP_REFUND_FCT` + Cortex | 6,243 | Parquet Unload -> BigQuery Native + `AI.CLASSIFY` / `AI.SCORE` | `PARTITION BY DATE(DSP_TS)` / `CLUSTER BY DSP_RSN_CD, RFND_STS_FLG` |
 | `OPS_RAW.MRC_COMM_SCD2` | Native FDN | 1,100 | Parquet Unload -> BigQuery Native | `PARTITION BY EFF_FROM_DT` / `CLUSTER BY MRC_ID` |
@@ -22,7 +22,7 @@
 | `OPS_RAW.MRC_PARTNER_MSTR` | Native FDN | 400 | Parquet Unload -> BigQuery Native | `CLUSTER BY ZONE_ID, VERT_CD` |
 | `OPS_RAW.GEO_ZONE_LKP` | Native FDN + `RAP_REGIONAL_ZONE_ACCESS` | 36 | Parquet Unload -> BigQuery Native + **BigQuery Row Access Policy** | Small dimension (unpartitioned) |
 
-> **Upstream Airbyte Ingestion**: `ingestion-airbyte/airbyte_terraform/main.tf` & live Airbyte OSS (`quickbite-airbyte-vm`) currently sync `oltp.dlv_ord_hdr`, `oltp.dlv_ord_item_ln`, and `oltp.dsp_refund_fct` incrementally (`updated_at` cursor, `CDC_` prefix) to `QUICKBITE_PROD.OPS_RAW`. Cutover re-points the connection to `dcd-migration-demo.quickbite_raw_ops` using keyless GCE Service Account ADC.
+> **Upstream Airbyte Ingestion**: `ingestion-airbyte/airbyte_terraform/main.tf` & live Airbyte OSS (`quickbite-airbyte-vm`) currently sync `oltp.dlv_ord_hdr`, `oltp.dlv_ord_item_ln`, and `oltp.dsp_refund_fct` incrementally (`updated_at` cursor, `CDC_` prefix) to `URBANFORK_PROD.OPS_RAW`. Cutover re-points the connection to `dcd-migration-demo.urbanfork_raw_ops` using keyless GCE Service Account ADC.
 
 ---
 

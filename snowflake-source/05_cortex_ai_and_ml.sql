@@ -1,13 +1,13 @@
 -- =============================================================================
--- QuickBite Snowflake Source Setup — Step 5: Snowflake Cortex AISQL & ML Forecast
+-- UrbanFork Snowflake Source Setup — Step 5: Snowflake Cortex AISQL & ML Forecast
 -- Migrated by Antigravity to BigQuery AI:
 --   * AI_CLASSIFY           -> BigQuery AI.CLASSIFY (zero-shot)
 --   * AI_SENTIMENT          -> BigQuery AI.SCORE (calibrated severity 0.0-1.0)
 --   * SNOWFLAKE.ML.FORECAST -> BigQuery AI.FORECAST (zero-shot TimesFM, no training!)
 -- =============================================================================
 USE ROLE ACCOUNTADMIN;
-USE WAREHOUSE QB_TRANSFORM_WH;
-USE DATABASE QUICKBITE_PROD;
+USE WAREHOUSE UF_TRANSFORM_WH;
+USE DATABASE URBANFORK_PROD;
 
 -- 1. Triage recent customer support dispute tickets using Snowflake Cortex AISQL
 CREATE OR REPLACE TABLE MART.CORTEX_DISPUTE_TRIAGE_SAMPLE AS
@@ -43,7 +43,7 @@ WHERE h.ORD_STS_CD = 'D'
 GROUP BY 1, 2;
 
 CREATE OR REPLACE SNOWFLAKE.ML.FORECAST MART.MDL_REGIONAL_ORDER_FORECAST (
-    INPUT_DATA => SYSTEM$REFERENCE('TABLE', 'QUICKBITE_PROD.MART.FCT_DAILY_REGION_DEMAND_TRAIN'),
+    INPUT_DATA => SYSTEM$REFERENCE('TABLE', 'URBANFORK_PROD.MART.FCT_DAILY_REGION_DEMAND_TRAIN'),
     SERIES_COLNAME => 'REG_CD',
     TIMESTAMP_COLNAME => 'ORD_DAY_TS',
     TARGET_COLNAME => 'DAILY_ORDERS_CNT'

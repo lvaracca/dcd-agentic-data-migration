@@ -51,11 +51,11 @@ SELECT
     4
   ) AS EFFECTIVE_TAKE_RATE_PCT
 FROM ${ref("STG_ORDER_BASKETS")} s
-JOIN ${ref("quickbite_raw_ops", "SYS_CAL_DIM")} cal
+JOIN ${ref("urbanfork_raw_ops", "SYS_CAL_DIM")} cal
   ON s.ORD_DT_SK = cal.DT_SK
-JOIN ${ref("quickbite_raw_ops", "GEO_ZONE_LKP")} z
+JOIN ${ref("urbanfork_raw_ops", "GEO_ZONE_LKP")} z
   ON s.ZONE_ID = z.ZONE_ID
-JOIN ${ref("quickbite_raw_ops", "MRC_COMM_SCD2")} scd
+JOIN ${ref("urbanfork_raw_ops", "MRC_COMM_SCD2")} scd
   ON s.MRC_ID = scd.MRC_ID
  AND cal.CAL_DT BETWEEN scd.EFF_FROM_DT AND scd.EFF_TO_DT
 LEFT JOIN ${ref("STG_ORDER_DISPUTES_AGG")} d

@@ -8,7 +8,7 @@ __pycache__/
 *.pem
 *.p8
 
-# Generated Data Files (reproducible via data-generator/generate_quickbite_data.py)
+# Generated Data Files (reproducible via data-generator/generate_urbanfork_data.py)
 data-generator/output/*.csv.gz
 data-generator/output/*.jsonl.gz
 

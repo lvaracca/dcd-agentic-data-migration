@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# QuickBite Demo — Deploy Private GCE VM with PostgreSQL OLTP + Airbyte OSS
+# UrbanFork Demo — Deploy Private GCE VM with PostgreSQL OLTP + Airbyte OSS
 # 100% Argolis-compliant:
 #   - Private VM (--no-address) + Shielded VM
 #   - Outbound internet via Cloud Router + Cloud NAT
@@ -32,7 +32,7 @@ gcloud services enable iap.googleapis.com --project="${PROJECT_ID}"
 echo "=== 2/5 Creating Dedicated Airbyte Service Account (${SA_EMAIL}) ==="
 if ! gcloud iam service-accounts describe "${SA_EMAIL}" --project="${PROJECT_ID}" >/dev/null 2>&1; then
   gcloud iam service-accounts create "${SA_NAME}" \
-    --display-name="QuickBite Airbyte OSS Worker SA" \
+    --display-name="UrbanFork Airbyte OSS Worker SA" \
     --project="${PROJECT_ID}"
   sleep 5
 fi

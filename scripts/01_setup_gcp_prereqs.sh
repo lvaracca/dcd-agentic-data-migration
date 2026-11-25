@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# QuickBite Demo — Step 1: Google Cloud Bucket & BigLake Setup (us-central1)
+# UrbanFork Demo — Step 1: Google Cloud Bucket & BigLake Setup (us-central1)
 # Usage:
 #   1. Initial setup (Bucket + BigLake Connection + APIs):
 #      ./scripts/01_setup_gcp_prereqs.sh
@@ -19,7 +19,7 @@ export CLOUDSDK_METRICS_ENVIRONMENT="${CLOUDSDK_METRICS_ENVIRONMENT:+$CLOUDSDK_M
 
 PROJECT_ID="${GCP_PROJECT_ID:-$(gcloud config get-value project 2>/dev/null)}"
 REGION="${GCP_REGION:-us-central1}"
-BUCKET_NAME="${GCS_LAKEHOUSE_BUCKET:-${PROJECT_ID}-quickbite-lakehouse}"
+BUCKET_NAME="${GCS_LAKEHOUSE_BUCKET:-${PROJECT_ID}-urbanfork-lakehouse}"
 BIGLAKE_CONN="${BQ_BIGLAKE_CONNECTION:-biglake-iceberg-conn}"
 
 if [[ -z "${PROJECT_ID}" || "${PROJECT_ID}" == "your-gcp-project-id" ]]; then
@@ -98,7 +98,7 @@ gcloud projects add-iam-policy-binding "${PROJECT_ID}" \
   --condition=None >/dev/null
 
 echo "=== Creating Target BigQuery Datasets in ${REGION} ==="
-for DS in "${BQ_RAW_DATASET:-quickbite_raw_ops}" "${BQ_IOT_DATASET:-quickbite_raw_iot}" "${BQ_MART_DATASET:-quickbite_gold_mart}"; do
+for DS in "${BQ_RAW_DATASET:-urbanfork_raw_ops}" "${BQ_IOT_DATASET:-urbanfork_raw_iot}" "${BQ_MART_DATASET:-urbanfork_gold_mart}"; do
   if ! bq --project_id="${PROJECT_ID}" ls -d "${DS}" >/dev/null 2>&1; then
     bq --location="${REGION}" --project_id="${PROJECT_ID}" mk --dataset --label=datacloud:antigravity "${PROJECT_ID}:${DS}"
   fi

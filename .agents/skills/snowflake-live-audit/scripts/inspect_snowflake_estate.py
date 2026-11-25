@@ -19,8 +19,8 @@ def main() -> None:
         user=os.environ["SNOWFLAKE_USER"],
         password=os.environ["SNOWFLAKE_PASSWORD"],
         role=os.environ.get("SNOWFLAKE_ROLE", "ACCOUNTADMIN"),
-        warehouse=os.environ.get("SNOWFLAKE_WAREHOUSE", "QB_LOAD_WH"),
-        database="QUICKBITE_PROD",
+        warehouse=os.environ.get("SNOWFLAKE_WAREHOUSE", "UF_LOAD_WH"),
+        database="URBANFORK_PROD",
     )
     out: dict = {}
     try:
@@ -28,7 +28,7 @@ def main() -> None:
         cur.execute(
             """
             SELECT TABLE_SCHEMA, TABLE_NAME, TABLE_TYPE, IS_ICEBERG, ROW_COUNT, BYTES, CLUSTERING_KEY
-            FROM QUICKBITE_PROD.INFORMATION_SCHEMA.TABLES
+            FROM URBANFORK_PROD.INFORMATION_SCHEMA.TABLES
             WHERE TABLE_SCHEMA IN ('OPS_RAW', 'IOT_RAW', 'MART')
             ORDER BY TABLE_SCHEMA, TABLE_NAME
             """
@@ -36,7 +36,7 @@ def main() -> None:
         cols = [c[0] for c in cur.description]
         out["tables_and_views"] = [dict(zip(cols, r)) for r in cur.fetchall()]
 
-        cur.execute("SHOW TASKS IN SCHEMA QUICKBITE_PROD.MART")
+        cur.execute("SHOW TASKS IN SCHEMA URBANFORK_PROD.MART")
         t_cols = [c[0] for c in cur.description]
         out["snowflake_task_dag"] = [
             {
@@ -49,19 +49,19 @@ def main() -> None:
             for r in cur.fetchall()
         ]
 
-        cur.execute("SHOW STREAMS IN SCHEMA QUICKBITE_PROD.OPS_RAW")
+        cur.execute("SHOW STREAMS IN SCHEMA URBANFORK_PROD.OPS_RAW")
         s_cols = [c[0] for c in cur.description]
         out["streams"] = [dict(zip(s_cols, r)).get("name") for r in cur.fetchall()]
 
-        cur.execute("SHOW MASKING POLICIES IN SCHEMA QUICKBITE_PROD.GOVERNANCE")
+        cur.execute("SHOW MASKING POLICIES IN SCHEMA URBANFORK_PROD.GOVERNANCE")
         m_cols = [c[0] for c in cur.description]
         out["masking_policies"] = [dict(zip(m_cols, r)).get("name") for r in cur.fetchall()]
 
-        cur.execute("SHOW ROW ACCESS POLICIES IN SCHEMA QUICKBITE_PROD.GOVERNANCE")
+        cur.execute("SHOW ROW ACCESS POLICIES IN SCHEMA URBANFORK_PROD.GOVERNANCE")
         r_cols = [c[0] for c in cur.description]
         out["row_access_policies"] = [dict(zip(r_cols, r)).get("name") for r in cur.fetchall()]
 
-        cur.execute("ALTER WAREHOUSE QB_LOAD_WH SUSPEND")
+        cur.execute("ALTER WAREHOUSE UF_LOAD_WH SUSPEND")
     except Exception as exc:
         out["warning"] = str(exc)
     finally:

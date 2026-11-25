@@ -31,7 +31,7 @@ FDN_RELATIONAL_TABLES = [
     ("GEO_ZONE_LKP", ""),
     ("MRC_PARTNER_MSTR", "CLUSTER BY ZONE_ID, VERT_CD"),
     ("MRC_COMM_SCD2", "PARTITION BY EFF_FROM_DT CLUSTER BY MRC_ID"),
-    ("CUST_USER_MSTR", "CLUSTER BY HOME_ZONE_ID, QB_PASS_FLG"),
+    ("CUST_USER_MSTR", "CLUSTER BY HOME_ZONE_ID, UF_PASS_FLG"),
     ("CRR_COURIER_MSTR", "CLUSTER BY HOME_ZONE_ID, VEH_TP_CD"),
     ("DSP_REFUND_FCT", "PARTITION BY DATE(DSP_TS) CLUSTER BY DSP_RSN_CD, RFND_STS_FLG"),
 ]
@@ -58,23 +58,23 @@ def main() -> None:
     region = os.environ.get("GCP_REGION", "us-central1")
     bucket = os.environ["GCS_LAKEHOUSE_BUCKET"]
     conn_id = os.environ.get("BQ_BIGLAKE_CONNECTION", "biglake-iceberg-conn")
-    raw_ds = os.environ.get("BQ_RAW_DATASET", "quickbite_raw_ops")
-    iot_ds = os.environ.get("BQ_IOT_DATASET", "quickbite_raw_iot")
+    raw_ds = os.environ.get("BQ_RAW_DATASET", "urbanfork_raw_ops")
+    iot_ds = os.environ.get("BQ_IOT_DATASET", "urbanfork_raw_iot")
 
     sf = snowflake.connector.connect(
         account=os.environ["SNOWFLAKE_ACCOUNT"],
         user=os.environ["SNOWFLAKE_USER"],
         password=os.environ["SNOWFLAKE_PASSWORD"],
         role=os.environ.get("SNOWFLAKE_ROLE", "ACCOUNTADMIN"),
-        warehouse=os.environ.get("SNOWFLAKE_WAREHOUSE", "QB_LOAD_WH"),
-        database="QUICKBITE_PROD",
+        warehouse=os.environ.get("SNOWFLAKE_WAREHOUSE", "UF_LOAD_WH"),
+        database="URBANFORK_PROD",
     )
 
     try:
         cur = sf.cursor()
         print("=== Part A: Zero-Copy BigLake Iceberg Mount for 4 High-Volume Tables ===")
         for tbl, part_spec in ICEBERG_TABLES:
-            cur.execute(f"SELECT SYSTEM$GET_ICEBERG_TABLE_INFORMATION('QUICKBITE_PROD.OPS_RAW.{tbl}')")
+            cur.execute(f"SELECT SYSTEM$GET_ICEBERG_TABLE_INFORMATION('URBANFORK_PROD.OPS_RAW.{tbl}')")
             info = json.loads(cur.fetchone()[0])
             meta_uri = info["metadataLocation"].replace("gcs://", "gs://")
             print(f"   [Zero-Copy Iceberg] {tbl} -> {meta_uri}")
@@ -97,8 +97,8 @@ def main() -> None:
             gcs_prefix = f"fdn-export/{tbl.lower()}/"
             cur.execute(
                 f"""
-                COPY INTO @QUICKBITE_PROD.OPS_RAW.GCS_EXPORT_STAGE/{tbl.lower()}/
-                FROM QUICKBITE_PROD.OPS_RAW.{tbl}
+                COPY INTO @URBANFORK_PROD.OPS_RAW.GCS_EXPORT_STAGE/{tbl.lower()}/
+                FROM URBANFORK_PROD.OPS_RAW.{tbl}
                 FILE_FORMAT = (TYPE = PARQUET)
                 HEADER = TRUE
                 OVERWRITE = TRUE;
@@ -118,7 +118,7 @@ def main() -> None:
         print("=== Part C: Migrating Semi-Structured VARIANT Table -> BigQuery Native JSON ===")
         cur.execute(
             """
-            COPY INTO @QUICKBITE_PROD.OPS_RAW.GCS_EXPORT_STAGE/app_delivery_pings_json/data
+            COPY INTO @URBANFORK_PROD.OPS_RAW.GCS_EXPORT_STAGE/app_delivery_pings_json/data
             FROM (
                 SELECT OBJECT_CONSTRUCT(
                     'PING_ID', PING_ID,
@@ -126,7 +126,7 @@ def main() -> None:
                     'ORD_ID', ORD_ID,
                     'PAYLOAD', PAYLOAD
                 )
-                FROM QUICKBITE_PROD.IOT_RAW.APP_DELIVERY_PINGS
+                FROM URBANFORK_PROD.IOT_RAW.APP_DELIVERY_PINGS
             )
             FILE_FORMAT = (TYPE = JSON COMPRESSION = GZIP)
             OVERWRITE = TRUE;
@@ -150,7 +150,7 @@ def main() -> None:
         print("   [VARIANT -> Native BQ JSON] APP_DELIVERY_PINGS migrated.")
 
         try:
-            cur.execute("ALTER WAREHOUSE QB_LOAD_WH SUSPEND")
+            cur.execute("ALTER WAREHOUSE UF_LOAD_WH SUSPEND")
         except Exception:
             pass
     finally:

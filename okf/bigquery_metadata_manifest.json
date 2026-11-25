@@ -4,11 +4,11 @@
     "snowflake-source/04_legacy_views_and_procs.sql",
     "snowflake-source/snowpark/snowpark_merchant_fraud_scoring.py",
     "snowflake-source/cortex-analyst/cortex_ops_model.yaml",
-    "bi-powerbi/QuickBite_Executive_Cockpit.SemanticModel/definition/tables/*.tmdl"
+    "bi-powerbi/UrbanFork_Executive_Cockpit.SemanticModel/definition/tables/*.tmdl"
   ],
   "tables": [
     {
-      "dataset": "quickbite_raw_ops",
+      "dataset": "urbanfork_raw_ops",
       "table": "DLV_ORD_HDR",
       "description": "Order header fact table (Zero-Copy BigLake Iceberg). Grain: 1 row per delivery order (ORD_ID). Filter ORD_STS_CD = 'D' for realized revenue. WARNING: TIP_USD passes 100% to couriers and MUST NEVER be included in Platform Net Revenue.",
       "columns": {
@@ -24,12 +24,12 @@
         "DLV_FEE_USD": "Delivery fee paid by customer (USD). Included in Platform Net Revenue.",
         "SRV_FEE_USD": "Platform service fee paid by customer (USD). Included in Platform Net Revenue.",
         "TIP_USD": "Pass-through courier tip (USD). Goes 100% to couriers — NEVER include in Platform Net Revenue.",
-        "CRR_PAY_USD": "Courier payout cost paid by QuickBite (USD). Deducted from Platform Net Revenue.",
-        "PROMO_VOUCHER_USD": "QuickBite-funded promotional voucher subsidy (USD). Deducted from Platform Net Revenue."
+        "CRR_PAY_USD": "Courier payout cost paid by UrbanFork (USD). Deducted from Platform Net Revenue.",
+        "PROMO_VOUCHER_USD": "UrbanFork-funded promotional voucher subsidy (USD). Deducted from Platform Net Revenue."
       }
     },
     {
-      "dataset": "quickbite_raw_ops",
+      "dataset": "urbanfork_raw_ops",
       "table": "DLV_ORD_ITEM_LN",
       "description": "Order item line detail (Zero-Copy BigLake Iceberg). Grain: 1 row per item SKU line (ORD_LN_ID). GMV = SUM(QTY_N * UNIT_PRC_USD). ANTI-FANOUT RULE: Always pre-aggregate GMV at ORD_ID grain before joining DSP_REFUND_FCT.",
       "columns": {
@@ -40,7 +40,7 @@
       }
     },
     {
-      "dataset": "quickbite_raw_ops",
+      "dataset": "urbanfork_raw_ops",
       "table": "MRC_COMM_SCD2",
       "description": "Slowly Changing Dimension Type 2 (SCD2) merchant commission contract history. CRITICAL JOIN RULE: Always join on CAL_DT BETWEEN EFF_FROM_DT AND EFF_TO_DT. NEVER filter IS_CURR_FLG = 1 for historical revenue (causes +$127,296.80 Q3 2025 overstatement!).",
       "columns": {
@@ -52,7 +52,7 @@
       }
     },
     {
-      "dataset": "quickbite_raw_ops",
+      "dataset": "urbanfork_raw_ops",
       "table": "DSP_REFUND_FCT",
       "description": "Customer dispute and refund events. Grain: 1 row per dispute ticket (DSP_ID). Filter RFND_STS_FLG = 1 for Approved Refunds. ANTI-FANOUT RULE: Pre-aggregate by ORD_ID before joining item lines (prevents 3.27x refund overcounting).",
       "columns": {
@@ -65,7 +65,7 @@
       }
     },
     {
-      "dataset": "quickbite_raw_ops",
+      "dataset": "urbanfork_raw_ops",
       "table": "ZNE_FLEET_SNAP",
       "description": "15-minute live courier fleet availability snapshots per delivery zone (Zero-Copy BigLake Iceberg). SNAPSHOT TRAP WARNING: ONLINE_CRR_N, BUSY_CRR_N, and UNASSIGNED_ORD_N are NON-ADDITIVE stock measures. NEVER SUM across SNAP_TS; always isolate the latest SNAP_TS per zone or query DT_LIVE_ZONE_SUPPLY_DEFICIT.",
       "columns": {
@@ -77,7 +77,7 @@
       }
     },
     {
-      "dataset": "quickbite_raw_ops",
+      "dataset": "urbanfork_raw_ops",
       "table": "MRC_PAYOUT_LEDGER",
       "description": "Merchant payout settlements and dispute chargeback ledger (Zero-Copy BigLake Iceberg). HIDDEN JOIN RULE: Chargeback rows join to orders via CONCAT('CBK-', ORD_ID) = REF_DOC_TXT.",
       "columns": {
@@ -87,18 +87,18 @@
       }
     },
     {
-      "dataset": "quickbite_raw_ops",
+      "dataset": "urbanfork_raw_ops",
       "table": "SYS_CAL_DIM",
-      "description": "Corporate fiscal calendar dimension. IMPORTANT: QuickBite Fiscal Year starts on February 1st (FISC_YR_N / FISC_QTR_N differ from calendar quarters!).",
+      "description": "Corporate fiscal calendar dimension. IMPORTANT: UrbanFork Fiscal Year starts on February 1st (FISC_YR_N / FISC_QTR_N differ from calendar quarters!).",
       "columns": {
         "DT_SK": "Integer date key (YYYYMMDD).",
         "CAL_DT": "Calendar date (DATE).",
-        "FISC_YR_N": "QuickBite Fiscal Year (starts Feb 1).",
-        "FISC_QTR_N": "QuickBite Fiscal Quarter (Q1 = Feb-Apr, Q2 = May-Jul, Q3 = Aug-Oct, Q4 = Nov-Jan)."
+        "FISC_YR_N": "UrbanFork Fiscal Year (starts Feb 1).",
+        "FISC_QTR_N": "UrbanFork Fiscal Quarter (Q1 = Feb-Apr, Q2 = May-Jul, Q3 = Aug-Oct, Q4 = Nov-Jan)."
       }
     },
     {
-      "dataset": "quickbite_raw_iot",
+      "dataset": "urbanfork_raw_iot",
       "table": "APP_DELIVERY_PINGS",
       "description": "Mobile delivery app telemetry pings migrated from Snowflake VARIANT to native BigQuery JSON. TELEMETRY BUG RULE: Always exclude LAX_STRING(PAYLOAD.app_ver) = '3.8.0-beta' (1,933 orders have corrupted GPS kitchen prep timers).",
       "columns": {
@@ -107,23 +107,23 @@
       }
     },
     {
-      "dataset": "quickbite_gold_mart",
+      "dataset": "urbanfork_gold_mart",
       "table": "FCT_PLATFORM_NET_REVENUE",
       "description": "Certified Gold daily marketplace profitability fact table (Dataform + Power BI DirectQuery). Encodes SCD2 merchant commission lookup, anti-fanout approved refund deduction, and excludes pass-through courier tips. Official Benchmarks: Q3 2025 Calendar Restaurant Net Revenue = $153,150.49; FY25 Restaurant = $937,401.38; FY25 Grocery = $38,309.66.",
       "columns": {
         "CAL_DT": "Calendar date of delivered order.",
-        "FISC_YR_N": "QuickBite Fiscal Year (starts February 1).",
-        "FISC_QTR_N": "QuickBite Fiscal Quarter (1-4).",
+        "FISC_YR_N": "UrbanFork Fiscal Year (starts February 1).",
+        "FISC_QTR_N": "UrbanFork Fiscal Quarter (1-4).",
         "REG_CD": "Macro region code (EMEA, AMER, APAC).",
         "VERTICAL_NM": "Marketplace vertical ('Restaurant' or 'Grocery').",
         "GROSS_MERCHANDISE_VALUE_USD": "Total Gross Merchandise Value (GMV) of completed delivered orders (USD).",
         "APPROVED_REFUNDS_USD": "Total approved customer refunds (RFND_STS_FLG = 1), deduplicated at order grain.",
-        "PLATFORM_NET_REVENUE_USD": "Official QuickBite Platform Net Revenue (Net Take): Merchant SCD2 Commission + Delivery & Service Fees - Courier Pay - Promo Vouchers - Approved Refunds (excludes Courier Tips).",
+        "PLATFORM_NET_REVENUE_USD": "Official UrbanFork Platform Net Revenue (Net Take): Merchant SCD2 Commission + Delivery & Service Fees - Courier Pay - Promo Vouchers - Approved Refunds (excludes Courier Tips).",
         "EFFECTIVE_TAKE_RATE_PCT": "Platform Net Revenue divided by GMV (Power BI DAX: Effective Take-Rate %)."
       }
     },
     {
-      "dataset": "quickbite_gold_mart",
+      "dataset": "urbanfork_gold_mart",
       "table": "DIM_PRIME_PARTNER_SCORECARD",
       "description": "Certified Gold merchant tiering scorecard (Dataform + Power BI DirectQuery). A merchant earns IS_PRIME_PARTNER = TRUE iff trailing 90-day GMV > $25,000 AND avg kitchen prep < 14.0 min (excluding 3.8.0-beta) AND quality dispute rate < 2.0% AND rejection rate < 1.0%.",
       "columns": {
@@ -136,7 +136,7 @@
       }
     },
     {
-      "dataset": "quickbite_gold_mart",
+      "dataset": "urbanfork_gold_mart",
       "table": "DT_LIVE_ZONE_SUPPLY_DEFICIT",
       "description": "Certified Gold live courier supply deficit mart (migrated from Snowflake Dynamic Table; Power BI DirectQuery). Safely isolated to the latest fleet snapshot per zone (avoids Snapshot Trap). Critical Deficit Zone threshold: SUPPLY_DEFICIT_RATIO >= 2.50.",
       "columns": {

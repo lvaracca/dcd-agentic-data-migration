@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Automated End-to-End Parity Verifier (Snowflake QUICKBITE_PROD vs. BigQuery).
+Automated End-to-End Parity Verifier (Snowflake URBANFORK_PROD vs. BigQuery).
 Verifies:
   1. Row counts across all 12 Hybrid (Iceberg + FDN + JSON) tables
   2. Cent-accurate financial parity on Q3 2025 & FY 2025 Platform Net Revenue (SCD2)
@@ -49,16 +49,16 @@ def main() -> None:
     load_dotenv(ROOT_DIR / ".env")
     project_id = os.environ["GCP_PROJECT_ID"]
     region = os.environ.get("GCP_REGION", "us-central1")
-    raw_ds = os.environ.get("BQ_RAW_DATASET", "quickbite_raw_ops")
-    iot_ds = os.environ.get("BQ_IOT_DATASET", "quickbite_raw_iot")
-    mart_ds = os.environ.get("BQ_MART_DATASET", "quickbite_gold_mart")
+    raw_ds = os.environ.get("BQ_RAW_DATASET", "urbanfork_raw_ops")
+    iot_ds = os.environ.get("BQ_IOT_DATASET", "urbanfork_raw_iot")
+    mart_ds = os.environ.get("BQ_MART_DATASET", "urbanfork_gold_mart")
 
     manifest = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
     gt = manifest["demo_ground_truth_benchmarks"]
     failures = 0
 
     print("==========================================================================")
-    print(" QUICKBITE MIGRATION PARITY & MATHEMATICAL VERIFICATION SUITE")
+    print(" URBANFORK MIGRATION PARITY & MATHEMATICAL VERIFICATION SUITE")
     print("==========================================================================\n")
 
     # 1. Row Count Parity across all 12 tables
@@ -133,15 +133,15 @@ def main() -> None:
             user=os.environ["SNOWFLAKE_USER"],
             password=os.environ["SNOWFLAKE_PASSWORD"],
             role=os.environ.get("SNOWFLAKE_ROLE", "ACCOUNTADMIN"),
-            warehouse=os.environ.get("SNOWFLAKE_WAREHOUSE", "QB_TRANSFORM_WH"),
-            database="QUICKBITE_PROD",
+            warehouse=os.environ.get("SNOWFLAKE_WAREHOUSE", "UF_TRANSFORM_WH"),
+            database="URBANFORK_PROD",
         )
         try:
             cur = sf.cursor()
-            cur.execute("SELECT COUNT_IF(IS_PRIME_PARTNER) FROM QUICKBITE_PROD.MART.DIM_PRIME_PARTNER_SCORECARD")
+            cur.execute("SELECT COUNT_IF(IS_PRIME_PARTNER) FROM URBANFORK_PROD.MART.DIM_PRIME_PARTNER_SCORECARD")
             sf_prime = int(cur.fetchone()[0])
             try:
-                cur.execute("ALTER WAREHOUSE QB_TRANSFORM_WH SUSPEND")
+                cur.execute("ALTER WAREHOUSE UF_TRANSFORM_WH SUSPEND")
             except Exception:
                 pass
         finally:

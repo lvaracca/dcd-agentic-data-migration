@@ -1,7 +1,7 @@
 ---
 name: extract-business-logic-to-okf
 description: >-
-  Reverse-engineers undocumented QuickBite business rules, status flags, KPI
+  Reverse-engineers undocumented UrbanFork business rules, status flags, KPI
   formulas, and join traps out of Snowflake SQL Views/Tasks/Procs, Snowpark
   Python, legacy cortex_ops_model.yaml, and Power BI (.tmdl) DAX measures into
   an Open Knowledge Format (OKF v0.2) repository, enriches BigQuery metadata,
@@ -22,14 +22,14 @@ Inspect all 4 codebase pillars (never guess meanings from column names alone—c
    - Extracts `Serial Refund Abuser Score` (`0.50*dispute_ratio + 0.30*abuse_share + 0.20*zone_factor` for `>= 5` delivered orders) and `High Fraud Risk User` (`>= 0.75`).
 3. **Legacy Cortex YAML**: `snowflake-source/cortex-analyst/cortex_ops_model.yaml`
    - Preserves synonyms and the critical rule: *Courier Tips (`TIP_USD`) are 100% pass-through and must NEVER be included in Platform Net Revenue*.
-4. **Power BI Semantic Model (`.tmdl` DAX)**: `bi-powerbi/QuickBite_Executive_Cockpit.SemanticModel/definition/tables/*.tmdl`
+4. **Power BI Semantic Model (`.tmdl` DAX)**: `bi-powerbi/UrbanFork_Executive_Cockpit.SemanticModel/definition/tables/*.tmdl`
    - Harvests the 11 official executive DAX definitions (`Platform Net Revenue ($)`, `Effective Take-Rate %`, `Active Prime Partners`, `Prime GMV Share %`, `Order-Weighted Kitchen Prep (Min)`, `Live Supply Deficit Ratio`, `Critical Deficit Zones >= 2.50`).
 
 ## Output Artifacts to Generate
 
 1. **OKF v0.2 Context Set Bundle (`bundle/`)**:
    - `bundle/agents.md` (Root router for data agents)
-   - `bundle/assets.md` & `bundle/assets/bigquery/<project>/quickbite_raw_ops/<table>.md` + `quickbite_gold_mart/<table>.md` (`Table Context` pages with grain, decoded column descriptions, join caveats, and compile-checked `GOOGLE_SQL` golden queries in `dataplex-types.global.queries`)
+   - `bundle/assets.md` & `bundle/assets/bigquery/<project>/urbanfork_raw_ops/<table>.md` + `urbanfork_gold_mart/<table>.md` (`Table Context` pages with grain, decoded column descriptions, join caveats, and compile-checked `GOOGLE_SQL` golden queries in `dataplex-types.global.queries`)
    - `bundle/documents.md` & `bundle/documents/concepts/*.md` (`Concept` pages for `platform-net-revenue.md`, `prime-partner-tier.md`, `supply-deficit-and-snapshot-trap.md`, `sla-breach-and-telemetry-caveats.md`, `refund-fraud-scoring.md`)
    - `bundle/_links.yaml`
 2. **Structured Metadata & Conversational Analytics Config (`okf/`)**:

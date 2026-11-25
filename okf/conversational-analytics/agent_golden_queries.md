@@ -1,4 +1,4 @@
-# QuickBite Certified Golden Queries (GoogleSQL)
+# UrbanFork Certified Golden Queries (GoogleSQL)
 
 ## 1. Q3 2025 Calendar Restaurant Platform Net Revenue (SCD2 Verified = $153,150.49)
 ```sql
@@ -8,7 +8,7 @@ SELECT
   ROUND(SUM(GROSS_MERCHANDISE_VALUE_USD), 2) AS gmv_usd,
   ROUND(SUM(PLATFORM_NET_REVENUE_USD), 2) AS platform_net_revenue_usd,
   ROUND(SAFE_DIVIDE(SUM(PLATFORM_NET_REVENUE_USD), SUM(GROSS_MERCHANDISE_VALUE_USD)), 4) AS effective_take_rate
-FROM `dcd-migration-demo.quickbite_gold_mart.FCT_PLATFORM_NET_REVENUE`
+FROM `dcd-migration-demo.urbanfork_gold_mart.FCT_PLATFORM_NET_REVENUE`
 WHERE CAL_DT BETWEEN '2025-07-01' AND '2025-09-30'
   AND VERT_CD = 1
 GROUP BY 1;
@@ -21,7 +21,7 @@ SELECT
   VERTICAL_NM,
   ROUND(SUM(PLATFORM_NET_REVENUE_USD), 2) AS platform_net_revenue_usd,
   ROUND(SUM(APPROVED_REFUNDS_USD), 2) AS approved_refunds_usd
-FROM `dcd-migration-demo.quickbite_gold_mart.FCT_PLATFORM_NET_REVENUE`
+FROM `dcd-migration-demo.urbanfork_gold_mart.FCT_PLATFORM_NET_REVENUE`
 WHERE FISC_YR_N = 2025
 GROUP BY 1, 2
 ORDER BY 2 DESC;
@@ -38,7 +38,7 @@ SELECT
   IDLE_CRR_N,
   UNASSIGNED_ORD_N,
   SUPPLY_DEFICIT_RATIO
-FROM `dcd-migration-demo.quickbite_gold_mart.DT_LIVE_ZONE_SUPPLY_DEFICIT`
+FROM `dcd-migration-demo.urbanfork_gold_mart.DT_LIVE_ZONE_SUPPLY_DEFICIT`
 ORDER BY SUPPLY_DEFICIT_RATIO DESC
 LIMIT 5;
 ```
@@ -60,7 +60,7 @@ SELECT
       SUM(DELIVERED_ORDERS_90D)
     ), 2
   ) AS order_weighted_prep_min
-FROM `dcd-migration-demo.quickbite_gold_mart.DIM_PRIME_PARTNER_SCORECARD`
+FROM `dcd-migration-demo.urbanfork_gold_mart.DIM_PRIME_PARTNER_SCORECARD`
 WHERE REG_CD = 'EMEA'
 GROUP BY 1;
 ```
@@ -69,7 +69,7 @@ GROUP BY 1;
 ```sql
 SELECT
   ROUND(SUM(APPROVED_REFUNDS_USD), 2) AS total_approved_refunds_usd
-FROM `dcd-migration-demo.quickbite_gold_mart.FCT_PLATFORM_NET_REVENUE`
+FROM `dcd-migration-demo.urbanfork_gold_mart.FCT_PLATFORM_NET_REVENUE`
 WHERE CAL_DT <= '2026-03-31';
 ```
 
@@ -80,10 +80,10 @@ SELECT
   m.MRC_NM,
   COUNT(DISTINCT d.ORD_ID) AS charged_back_orders,
   ROUND(SUM(ABS(led.LEDGER_AMT_USD)), 2) AS total_chargebacks_usd
-FROM `dcd-migration-demo.quickbite_raw_ops.DSP_REFUND_FCT` d
-JOIN `dcd-migration-demo.quickbite_raw_ops.DLV_ORD_HDR` h ON d.ORD_ID = h.ORD_ID
-JOIN `dcd-migration-demo.quickbite_raw_ops.MRC_PARTNER_MSTR` m ON h.MRC_ID = m.MRC_ID
-JOIN `dcd-migration-demo.quickbite_raw_ops.MRC_PAYOUT_LEDGER` led
+FROM `dcd-migration-demo.urbanfork_raw_ops.DSP_REFUND_FCT` d
+JOIN `dcd-migration-demo.urbanfork_raw_ops.DLV_ORD_HDR` h ON d.ORD_ID = h.ORD_ID
+JOIN `dcd-migration-demo.urbanfork_raw_ops.MRC_PARTNER_MSTR` m ON h.MRC_ID = m.MRC_ID
+JOIN `dcd-migration-demo.urbanfork_raw_ops.MRC_PAYOUT_LEDGER` led
   ON CONCAT('CBK-', d.ORD_ID) = led.REF_DOC_TXT
 GROUP BY 1, 2
 ORDER BY 4 DESC
@@ -98,7 +98,7 @@ SELECT
   FORECAST_ORDERS_CNT,
   LOWER_BOUND_95,
   UPPER_BOUND_95
-FROM `dcd-migration-demo.quickbite_gold_mart.FCT_REGIONAL_ORDER_FORECAST_14D`
+FROM `dcd-migration-demo.urbanfork_gold_mart.FCT_REGIONAL_ORDER_FORECAST_14D`
 ORDER BY REG_CD, forecast_dt;
 ```
 
@@ -109,7 +109,7 @@ SELECT
   COUNT(*) AS ticket_cnt,
   ROUND(AVG(BQ_AI_URGENCY_SCORE), 3) AS avg_urgency_score,
   ROUND(SUM(RFND_AMT_USD), 2) AS total_refund_requested_usd
-FROM `dcd-migration-demo.quickbite_gold_mart.BQ_AI_DISPUTE_TRIAGE`
+FROM `dcd-migration-demo.urbanfork_gold_mart.BQ_AI_DISPUTE_TRIAGE`
 GROUP BY 1
 ORDER BY avg_urgency_score DESC;
 ```

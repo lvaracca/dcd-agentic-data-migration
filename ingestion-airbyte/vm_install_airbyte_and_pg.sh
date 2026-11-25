@@ -14,11 +14,11 @@ if ! command -v docker >/dev/null 2>&1; then
   sudo usermod -aG docker "$USER"
 fi
 
-echo "=== [VM 2/4] Starting quickbite-oltp-postgres Container (Port 5439) ==="
-mkdir -p ~/quickbite-oltp
-mv -f ~/docker-compose.oltp.yml ~/quickbite-oltp/docker-compose.oltp.yml
-mv -f ~/init_oltp.sql ~/quickbite-oltp/init_oltp.sql
-sudo docker compose -f ~/quickbite-oltp/docker-compose.oltp.yml up -d
+echo "=== [VM 2/4] Starting urbanfork-oltp-postgres Container (Port 5439) ==="
+mkdir -p ~/urbanfork-oltp
+mv -f ~/docker-compose.oltp.yml ~/urbanfork-oltp/docker-compose.oltp.yml
+mv -f ~/init_oltp.sql ~/urbanfork-oltp/init_oltp.sql
+sudo docker compose -f ~/urbanfork-oltp/docker-compose.oltp.yml up -d
 
 echo "=== [VM 3/4] Installing Airbyte abctl CLI ==="
 if ! command -v abctl >/dev/null 2>&1; then

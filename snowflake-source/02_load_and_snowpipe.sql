@@ -1,9 +1,9 @@
 -- =============================================================================
--- QuickBite Snowflake Source Setup — Step 2: File Formats, Stages, COPY & Pipe
+-- UrbanFork Snowflake Source Setup — Step 2: File Formats, Stages, COPY & Pipe
 -- =============================================================================
 USE ROLE ACCOUNTADMIN;
-USE WAREHOUSE QB_LOAD_WH;
-USE DATABASE QUICKBITE_PROD;
+USE WAREHOUSE UF_LOAD_WH;
+USE DATABASE URBANFORK_PROD;
 
 CREATE OR REPLACE FILE FORMAT OPS_RAW.CSV_STD_FMT
     TYPE = CSV
@@ -25,7 +25,7 @@ CREATE OR REPLACE STAGE IOT_RAW.IOT_LANDING_STAGE
 
 -- External GCS stage for exporting/unloading proprietary FDN tables to Parquet
 CREATE OR REPLACE STAGE OPS_RAW.GCS_EXPORT_STAGE
-    STORAGE_INTEGRATION = QUICKBITE_GCS_INT
+    STORAGE_INTEGRATION = URBANFORK_GCS_INT
     URL = 'gcs://{{GCS_LAKEHOUSE_BUCKET}}/fdn-export/'
     FILE_FORMAT = (TYPE = PARQUET);
 
